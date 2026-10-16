@@ -1,0 +1,43 @@
+/* X AI 回复助手 —— 注入页面级样式（面板样式由 panel.js 内的 Shadow-less 内联 <style> 承担） */
+
+/* 时间线悬浮「✦ AI 回复」按钮 */
+.xai-float {
+  position: fixed;
+  z-index: 2147482900;
+  display: none;
+  align-items: center;
+  gap: 4px;
+  height: 28px;
+  padding: 0 11px;
+  border-radius: 999px;
+  border: 1px solid rgba(29, 155, 240, 0.5);
+  background: rgba(21, 32, 43, 0.94);
+  color: #1d9bf0;
+  font: 600 12.5px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.14s ease, transform 0.14s ease;
+  transform: scale(0.94);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
+}
+
+.xai-float.is-on {
+  display: inline-flex;
+  opacity: 1;
+  transform: scale(1);
+}
+
+.xai-float:hover {
+  background: #1d9bf0;
+  color: #fff;
+  border-color: #1d9bf0;
+}
+
+/* 亮色主题下适配（X 支持浅色模式） */
+@media (prefers-color-scheme: light) {
+  .xai-float {
+    background: rgba(255, 255, 255, 0.95);
+  }
+}
