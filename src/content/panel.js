@@ -23,21 +23,64 @@
     failed: false,
     pending: false,
     results: [],
+    resultsTweet: null,
     tweet: null,
+    contextVersion: 0,
+    request: null,
     taskId: null,
     timer: null,
     elapsed: 0,
     composer: null,
     pinned: false, // 用户是否手动拖过面板（拖过就不再自动定位）
     lastGenKey: null, // 最近一次自动生成对应的推文键（防同一条重复自动请求）
+    lastGenTweet: null,
     // 流式
     port: null,
     streamText: '',
     streamFirstAt: 0,
     startedAt: 0,
   };
-  let cfg = XAI.defaults;
+  let cfg = Object.assign({}, XAI.defaults);
   let els = {};
+  let openRevision = 0;
+  let configRevision = 0;
+  let configSave = null;
+  let pendingConfig = {};
+
+  function saveConfig(patch) {
+    Object.assign(cfg, patch);
+    configRevision++;
+    Object.assign(pendingConfig, patch);
+    persistPendingConfig().catch((e) => U.toast('保存设置失败：' + String(e.message || e), 'err'));
+  }
+
+  function flushConfig() {
+    if (configSave) return configSave;
+    if (!Object.keys(pendingConfig).length) return Promise.resolve();
+    const patch = pendingConfig;
+    pendingConfig = {};
+    const saving = Promise.resolve().then(() => XAI.setConfig(patch)).catch((error) => {
+      // 保存失败时保留改动；随后排队的新值优先于失败批次中的旧值。
+      pendingConfig = Object.assign({}, patch, pendingConfig);
+      throw error;
+    }).finally(() => {
+      if (configSave === saving) configSave = null;
+    });
+    configSave = saving;
+    return saving;
+  }
+
+  async function persistPendingConfig() {
+    while (configSave || Object.keys(pendingConfig).length) await flushConfig();
+  }
+
+  async function waitForConfigSave() {
+    try { await persistPendingConfig(); }
+    catch (error) {
+      // 每次打开或生成最多重试一次；持续故障交给可重试的 UI 报错。
+      await persistPendingConfig();
+    }
+  }
 
   /* ------------------------------------------------------------------ *
    * 构建 DOM
@@ -245,22 +288,21 @@
       const b = e.target.closest('.xai-grp__b');
       if (!b) return;
       markOn(els.styleWrap, b);
-      XAI.setConfig({ style: b.dataset.v });
+      saveConfig({ style: b.dataset.v });
     });
 
     els.countWrap.addEventListener('click', (e) => {
       const b = e.target.closest('.xai-grp__b');
       if (!b) return;
       markOn(els.countWrap, b);
-      XAI.setConfig({ count: Number(b.dataset.v) });
+      saveConfig({ count: Number(b.dataset.v) });
     });
 
-    els.lang.addEventListener('change', () => XAI.setConfig({ lang: els.lang.value }));
+    els.lang.addEventListener('change', () => saveConfig({ lang: els.lang.value }));
 
     // 「自动生成」复选框：与设置页「交互行为」里的开关是同一个配置项
     els.autoCb.addEventListener('change', () => {
-      cfg.autoGenerate = els.autoCb.checked;
-      XAI.setConfig({ autoGenerate: els.autoCb.checked });
+      saveConfig({ autoGenerate: els.autoCb.checked });
     });
 
     els.go.addEventListener('click', () => {
@@ -408,24 +450,30 @@
 
   P.open = async function open(composer, tweetHint) {
     build();
-    cfg = await XAI.getConfig();
+    const revision = ++openRevision;
+    const loadedAt = configRevision;
+    await waitForConfigSave();
+    const loaded = await XAI.getConfig();
+    if (revision !== openRevision) return false;
+    if (loadedAt === configRevision) cfg = loaded;
+    if (!cfg.enabled) { P.close(); return false; }
+
+    // null 是明确的「待填入」模式，不能绑定首页内联框或另一个发帖框。
+    let current = null;
+    if (composer) {
+      const fresh = D.findComposer();
+      if (!fresh || !fresh.dialog || !fresh.isReply || fresh.dialog !== composer.dialog) return false;
+      current = fresh;
+    }
+    const tweet = (current && D.extractTargetTweet(current)) || tweetHint || null;
+    if (!tweet) return false;
+    setTarget(tweet, current);
 
     markOn(els.styleWrap, els.styleWrap.querySelector(`[data-v="${cfg.style}"]`));
     markOn(els.countWrap, els.countWrap.querySelector(`[data-v="${cfg.count}"]`));
     els.lang.value = cfg.lang;
     els.autoCb.checked = cfg.autoGenerate !== false;
 
-    // 重新探测弹层（打开面板期间 X 可能重渲染）
-    state.composer = composer || D.findComposer();
-    state.pending = false;
-
-    if (state.composer) {
-      const tweet = D.extractTargetTweet(state.composer);
-      if (tweet) state.tweet = tweet;
-      else if (tweetHint) state.tweet = tweetHint; // 弹层内提取失败时用点击时缓存的推文
-    } else if (tweetHint) {
-      state.tweet = tweetHint;
-    }
     refreshSrc();
 
     state.open = true;
@@ -433,7 +481,25 @@
     schedulePosition();
 
     if (!state.results.length) renderEmpty();
+    if (state.pending) setStatus('点这条推文的回复气泡，打开弹层后即可回填', 'warn');
+    return true;
   };
+
+  function setTarget(tweet, composer) {
+    if (!U.sameTweet(state.tweet, tweet)) {
+      cancelRequest();
+      state.contextVersion++;
+      state.results = [];
+      state.resultsTweet = null;
+      state.lastGenKey = null;
+      state.lastGenTweet = null;
+      state.failed = false;
+      renderEmpty();
+    }
+    state.tweet = tweet;
+    state.composer = composer;
+    state.pending = !composer;
+  }
 
   /** 渲染「回复对象」信息条 */
   function refreshSrc() {
@@ -448,19 +514,22 @@
   }
 
   P.close = function close() {
+    openRevision++;
     state.open = false;
     // 关闭后解除位置锁定：下次打开（新的发帖弹层）重新自动跟随
     state.pinned = false;
     // 清幂等键：下次再打开（哪怕同一条推文）允许重新自动生成
     state.lastGenKey = null;
-    // 断开流式连接，让 SW 立刻中止请求，不白烧 token
-    if (state.loading) {
-      cleanupPort();
-      chrome.runtime.sendMessage({ type: 'xai:cancel', payload: { taskId: state.taskId } });
-      setLoading(false);
-    }
+    state.lastGenTweet = null;
+    cancelRequest();
+    state.contextVersion++;
+    state.results = [];
+    state.resultsTweet = null;
+    state.tweet = null;
+    state.composer = null;
+    state.pending = false;
     if (host) host.classList.remove('is-open');
-    stopTimer();
+    if (host) stopTimer();
   };
 
   /**
@@ -507,8 +576,7 @@
   }
 
   function position() {
-    const c = state.composer || D.findComposer();
-    state.composer = c;
+    const c = state.composer;
     if (!host || !state.open) return;
 
     // 用户拖过面板 -> 尊重手动位置，不再自动跟随。
@@ -566,21 +634,15 @@
    * ------------------------------------------------------------------ */
 
   P.generate = async function generate() {
-    if (state.loading) return;
-
-    // 生成前重新探测，防止弹层被 React 重建后句柄失效
+    if (!state.open || state.loading || !state.tweet) return;
     const fresh = D.findComposer();
-    if (fresh) {
-      state.composer = fresh;
-      // 弹层可用 → 退出「待填入」模式，并重新提取推文（弹层里的更准）
-      state.pending = false;
-      const t = D.extractTargetTweet(fresh);
-      if (t) state.tweet = t;
-      refreshSrc();
-    } else if (!state.tweet) {
-      U.toast('找不到发帖弹层，也未能读取推文内容', 'err');
-      P.close();
+    if (!state.pending && !matchesComposer(fresh, state.tweet)) {
+      U.toast('回复对象已变化，请重新打开这条推文的回复面板', 'err');
       return;
+    }
+    if (matchesComposer(fresh, state.tweet)) {
+      state.composer = fresh;
+      state.pending = false;
     }
 
     if (!state.tweet || (!state.tweet.text && !(state.tweet.media || []).length)) {
@@ -589,48 +651,87 @@
       return;
     }
 
-    state.lastGenKey = tweetKey(state.tweet);
-setLoading(true);
-    state.taskId = U.uid();
+    const request = {
+      id: U.uid(),
+      context: state.contextVersion,
+      tweet: state.tweet,
+      port: null,
+      finishStream: null,
+      cancelled: false,
+    };
+    state.request = request;
+    state.taskId = request.id;
+    state.failed = false;
+    state.results = [];
+    state.resultsTweet = state.tweet;
+    renderEmpty();
+    setLoading(true);
     startTimer();
     state.streamText = '';
     state.port = null;
-
-    const payload = {
-      taskId: state.taskId,
-      tweet: state.tweet || { author: '', text: '', media: [] },
-      extra: {
-        style: cfg.style,
-        count: cfg.count,
-        lang: cfg.lang,
-        length: cfg.length,
-        customInstruction: '',
-      },
-    };
-
-    // 流式（默认开启）：第一个字到达就渲染，感知延迟最低
-    if (cfg.stream) {
-      try {
-        await runStream(payload);
-      } catch (e) {
-        // 中止时不报错（用户主动点的）
-        if (state.loading) onFail(String((e && e.message) || e));
-      }
-      return;
-    }
-
-    // 非流式（用户关闭了流式时的兜底路径）
     try {
+      // 用户刚修改的选项必须先保存，后台才能读到同一份配置。
+      await waitForConfigSave();
+      if (!isCurrentRequest(request)) return;
+      state.lastGenKey = tweetKey(state.tweet);
+      state.lastGenTweet = state.tweet;
+      const payload = {
+        taskId: request.id,
+        tweet: request.tweet,
+        extra: {
+          style: cfg.style,
+          count: cfg.count,
+          lang: cfg.lang,
+          length: cfg.length,
+          customInstruction: '',
+        },
+      };
+      if (cfg.stream) {
+        await runStream(payload, request);
+        return;
+      }
       const res = await chrome.runtime.sendMessage({ type: 'xai:generate', payload });
+      if (!isCurrentRequest(request)) return;
       if (!res || !res.ok) throw new Error((res && res.error) || '未知错误');
-      onDone(res.data);
+      onDone(res.data, request);
     } catch (e) {
-      onFail(String((e && e.message) || e));
+      if (isCurrentRequest(request)) onFail(String((e && e.message) || e), request);
     }
   };
 
+  function matchesComposer(composer, tweet) {
+    if (!composer || !composer.dialog || !composer.isReply) return false;
+    const extracted = D.extractTargetTweet(composer);
+    if (extracted) return U.sameTweet(extracted, tweet);
+    // 无法读取正文时，只信任 P.open 用一次性点击兜底绑定过的那个弹层。
+    return !!(state.composer && state.composer.dialog === composer.dialog && U.sameTweet(state.tweet, tweet));
+  }
+
+  function isCurrentRequest(request) {
+    return state.open && state.request === request && !request.cancelled &&
+      request.context === state.contextVersion && U.sameTweet(request.tweet, state.tweet);
+  }
+
+  function cancelRequest() {
+    const request = state.request;
+    state.request = null;
+    state.taskId = null;
+    if (request) {
+      request.cancelled = true;
+      if (request.finishStream) request.finishStream();
+      cleanupPort(request);
+      Promise.resolve(chrome.runtime.sendMessage({
+        type: 'xai:cancel', payload: { taskId: request.id },
+      })).catch(() => {});
+    }
+    if (host) {
+      setLoading(false);
+      stopTimer();
+    }
+  }
+
   /** 流式生成：Port 长连接，边收边渲染 */
-  function runStream(payload) {
+  function runStream(payload, request) {
     return new Promise((resolve, reject) => {
       let port;
       try {
@@ -639,65 +740,85 @@ setLoading(true);
         reject(e);
         return;
       }
+      request.port = port;
       state.port = port;
       state.streamFirstAt = 0;
+      let settled = false;
+      const finish = (error) => {
+        if (settled) return;
+        settled = true;
+        request.finishStream = null;
+        if (port.onMessage.removeListener) port.onMessage.removeListener(onMessage);
+        if (port.onDisconnect.removeListener) port.onDisconnect.removeListener(onDisconnect);
+        cleanupPort(request);
+        if (error) reject(error);
+        else resolve();
+      };
+      request.finishStream = finish;
 
-      port.onMessage.addListener((msg) => {
-        if (!msg || !msg.type) return;
+      const onMessage = (msg) => {
+        if (!isCurrentRequest(request) || !msg || !msg.type) return;
 
         if (msg.type === 'delta') {
           state.streamText = msg.text;
           if (!state.streamFirstAt) state.streamFirstAt = Date.now();
 
           // 边流边解析：模型逐条吐完时，能提前显示已完成的几条
-          const partial = U.parseReplyList(state.streamText, 0);
-          if (partial.length > state.results.length) {
+          const partial = U.parseCompleteReplyList(state.streamText).slice(0, cfg.count);
+          if (JSON.stringify(partial) !== JSON.stringify(state.results)) {
             state.results = partial;
+            state.resultsTweet = request.tweet;
             renderList(true);
-          } else {
-            updateFirstItem(state.results[0]);
           }
         } else if (msg.type === 'thinking') {
           setStatus('模型思考中… ' + U.fmtDuration(state.elapsed), 'busy');
         } else if (msg.type === 'done') {
-          cleanupPort();
-          onDone(msg);
-          resolve();
+          onDone(msg, request);
+          finish();
         } else if (msg.type === 'error') {
-          cleanupPort();
-          reject(new Error(msg.error));
+          finish(new Error(msg.error));
         }
-      });
+      };
 
-      port.onDisconnect.addListener(() => {
-        // SW 异常退出 / 用户中止
-        state.port = null;
-        if (state.loading) reject(new Error('已中止'));
-      });
+      const onDisconnect = () => finish(new Error('生成连接已断开'));
+      port.onMessage.addListener(onMessage);
+      port.onDisconnect.addListener(onDisconnect);
 
-      port.postMessage({ type: 'generate', payload });
+      try { port.postMessage({ type: 'generate', payload }); }
+      catch (e) { finish(e); }
     });
   }
 
-  function cleanupPort() {
-    if (state.port) {
+  function cleanupPort(request) {
+    const port = request && request.port;
+    if (port) {
+      request.port = null;
+      if (state.port === port) state.port = null;
       try {
-        state.port.disconnect();
+        port.disconnect();
       } catch (e) {
         /* noop */
       }
     }
-    state.port = null;
   }
 
   /** 生成成功 */
-  function onDone(data) {
-    state.results = data.list;
+  function onDone(data, request) {
+    if (!isCurrentRequest(request)) return;
+    const list = (data.list || []).filter((text) => typeof text === 'string' && text.trim() && !U.isSkipReply(text));
+    if (!list.length) {
+      onFail('未能生成可用回复，请换个风格重试', request);
+      return;
+    }
+    state.request = null;
+    state.taskId = null;
+    state.results = list;
+    state.resultsTweet = request.tweet;
     state.failed = false;
     renderList();
     const ttfb = state.streamFirstAt ? (state.streamFirstAt - state.startedAt) / 1000 : 0;
     setStatus(
-      `${data.list.length} 条 · ${(data.elapsedMs / 1000).toFixed(1)}s` +
+      `${list.length} 条 · ${(data.elapsedMs / 1000).toFixed(1)}s` +
         (ttfb ? `（首字 ${ttfb.toFixed(1)}s）` : '') +
         ` · ${data.model}`,
       'ok'
@@ -709,7 +830,10 @@ setLoading(true);
   }
 
   /** 生成失败 —— 按钮必须变「重试」且保持可点，绝不能变成死按钮 */
-  function onFail(msg) {
+  function onFail(msg, request) {
+    if (request && !isCurrentRequest(request)) return;
+    state.request = null;
+    state.taskId = null;
     state.failed = true;
     setLoading(false);
     stopTimer();
@@ -721,8 +845,7 @@ setLoading(true);
 
   /** 生成请求的幂等键：同一条推文不重复自动生成 */
   function tweetKey(t) {
-    if (!t) return '';
-    return t.url || (t.handle || t.author || '') + '|' + String(t.text || '').slice(0, 80);
+    return U.tweetKey(t);
   }
 
   /**
@@ -735,27 +858,17 @@ setLoading(true);
     if (state.loading) return;
     if (!state.tweet) return;
     const key = tweetKey(state.tweet);
-    if (key && key === state.lastGenKey) return;
+    if (key && (key === state.lastGenKey || U.sameTweet(state.tweet, state.lastGenTweet))) return;
     P.generate();
   };
 
   P.cancel = function cancel() {
-    if (!state.loading || !state.taskId) return;
-    // 先断 Port（SW 侧会因 onDisconnect 立刻 abort，省 token），
-    // 再发一次显式取消兜底（非流式路径靠它）
-    const wasStream = !!state.port;
-    cleanupPort();
-    chrome.runtime.sendMessage({ type: 'xai:cancel', payload: { taskId: state.taskId } });
-
-    // 流式：断连后由 runStream 的 catch 统一收尾，这里只改文案
-    if (!wasStream) {
-      setLoading(false);
-      stopTimer();
-      setStatus('已中止', 'warn');
-      schedulePosition();
-    } else {
-      setStatus('已中止', 'warn');
-    }
+    if (!state.loading) return;
+    cancelRequest();
+    state.lastGenKey = null;
+    state.lastGenTweet = null;
+    setStatus('已中止', 'warn');
+    schedulePosition();
   };
 
   /* ------------------------------------------------------------------ *
@@ -884,18 +997,24 @@ setLoading(true);
    * 回填
    * ------------------------------------------------------------------ */
 
-  P.use = function use(i) {
+  P.use = async function use(i) {
     const text = state.results[i];
-    if (!text) return;
+    if (!state.open || !text || !U.sameTweet(state.resultsTweet, state.tweet)) return false;
 
     const c = D.findComposer();
-    if (!c) {
-      U.toast('发帖弹层未打开：请点时间线这条推文的「回复」气泡，再回来点这条结果', 'err', 4200);
-      setStatus('尚无发帖弹层，打开后才能回填', 'warn');
-      return;
+    if (!matchesComposer(c, state.resultsTweet)) {
+      U.toast('请先打开这条推文的回复弹层，确认回复对象后再填入', 'err', 4200);
+      setStatus('回复对象尚未匹配，未填入', 'warn');
+      return false;
     }
 
-    E.setText(c.editor, text);
+    const context = state.contextVersion;
+    if (!(await E.setText(c.editor, text))) {
+      U.toast('未能填入输入框，请重试', 'err');
+      return false;
+    }
+    if (!state.open || context !== state.contextVersion) return false;
+    state.composer = c;
     state.pending = false;
 
     // 高亮已使用项
@@ -909,6 +1028,7 @@ setLoading(true);
     const ctr = E.getCounter(c.dialog);
     U.toast('已填入输入框' + (ctr ? '（字数 ' + ctr + '）' : ''), 'ok');
     // 不关闭面板，方便连续挑选
+    return true;
   };
 
   P.isOpen = () => state.open;
@@ -918,9 +1038,14 @@ setLoading(true);
    * 仅供 tools/preview.py 与自动化测试使用，正常流程不会走到。
    */
   P._debugSetResults = async function _debugSetResults(list, meta) {
-    state.results = list || [];
+    if (!state.open) {
+      const composer = D.findComposer();
+      if (!(await P.open(composer))) return false;
+    }
+    cancelRequest();
+    state.results = (list || []).filter((text) => typeof text === 'string' && !U.isSkipReply(text));
+    state.resultsTweet = state.tweet;
     state.failed = false;
-    if (!state.open) await P.open(state.composer);
     renderList();
     setStatus(
       (meta && meta.status) ||
@@ -932,9 +1057,10 @@ setLoading(true);
     schedulePosition();
   };
 
-  /** 设置"待填入"的推文（用户点悬浮按钮时还没有发帖弹层） */  P.setPendingTweet = function setPendingTweet(tweet) {
-    state.tweet = tweet;
-    state.pending = true;
+  /** 设置"待填入"的推文（用户点悬浮按钮时还没有发帖弹层） */
+  P.setPendingTweet = function setPendingTweet(tweet) {
+    if (!tweet || !state.open) return;
+    setTarget(tweet, null);
     if (!host) return;
     els.src.style.display = '';
     const head = [tweet.author, tweet.handle].filter(Boolean).join(' ');
@@ -944,7 +1070,8 @@ setLoading(true);
 
   /** 弹层出现时（main.js 调用），若处于待填入模式则保留结果 */
   P.onComposerReady = function onComposerReady(composer) {
-    if (!state.pending) return;
+    if (!state.pending || !matchesComposer(composer, state.tweet)) return;
     state.composer = composer;
+    state.pending = false;
   };
 })(typeof window !== 'undefined' ? window : self);

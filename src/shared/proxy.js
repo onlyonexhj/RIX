@@ -6,7 +6,7 @@
  *   所以要"让 AI 请求走某条路"，只能通过 `chrome.proxy` 改**浏览器全局**规则。
  *
  *   三种模式的全局影响差异很大：
- *     auto   = system 模式，扩展**不改任何设置**，零风险（默认）
+ *     auto   = 清除本扩展的覆盖，使用浏览器原有代理配置（默认）
  *     custom = fixed_servers + bypassList，把 AI API 域名加进 bypassList，
  *              实现「AI 直连、其他流量仍走你指定的代理」—— 精准可控
  *     direct = 全局直连，**会关掉整个浏览器的代理**，影响面最大
@@ -19,6 +19,14 @@
 
   const XAI = (root.XAI = root.XAI || {});
   const P = (XAI.proxy = {});
+
+  // 诊断的临时规则、用户应用和清除操作必须按顺序执行，避免旧诊断覆盖新设置。
+  let pending = Promise.resolve();
+  function serialize(operation) {
+    const result = pending.then(operation);
+    pending = result.catch(() => {});
+    return result;
+  }
 
   /**
    * 从 Base URL 提取主机名（用于 bypassList 精准控制）。
@@ -89,17 +97,21 @@
 
   /**
    * 应用代理设置。
-   * @param scope 'regular' = 常规窗口；'fixed_servers' 用 regular 即可
-   * @returns {ok, mode, message}
-   */
-  /**
-   * 应用代理设置。
    * @param {object} cfg        配置（需含 apiHost，即 AI 服务商域名）
    * @param {string[]} extraHosts 额外直连域名
    */
-  P.apply = async function apply(cfg, extraHosts) {
+  P.apply = function apply(cfg, extraHosts) {
+    return serialize(() => applySettings(cfg, extraHosts));
+  };
+
+  async function applySettings(cfg, extraHosts) {
     if (!chrome.proxy || !chrome.proxy.settings) {
       return { ok: false, message: '当前环境不支持 chrome.proxy（service worker 不可用）' };
+    }
+    // system 仍然会覆盖浏览器/命令行代理；auto 必须真正交还控制权。
+    if ((cfg.proxyMode || 'auto') === 'auto') {
+      const result = await clearSettings();
+      return Object.assign({}, result, { mode: 'auto', scope: 'none', apiDirect: false });
     }
     const value = P.buildScheme(cfg, extraHosts);
     try {
@@ -113,7 +125,7 @@
             ? 'global' // 全局生效
             : value.mode === 'fixed_servers'
               ? 'partial' // 只影响 API 域名之外的部分
-              : 'none', // system 模式不改变用户设置
+              : 'global',
         apiDirect: value.mode === 'fixed_servers' && value.rules.bypassList.indexOf(api) !== -1,
         message:
           value.mode === 'direct'
@@ -124,12 +136,12 @@
                 ':' +
                 value.rules.singleProxy.port +
                 (api ? '（' + api + ' 直连，其他照旧走代理）' : '')
-              : '已恢复跟随系统默认（扩展未改变你的设置）',
+              : '已应用代理设置',
       };
     } catch (e) {
       return { ok: false, message: '设置代理失败：' + String((e && e.message) || e) };
     }
-  };
+  }
 
   /** 读取当前生效的代理配置（用于设置页展示真实状态） */
   P.get = async function get() {
@@ -154,36 +166,44 @@
   };
 
   /** 清除扩展的代理设置（恢复 Chrome 原状） */
-  P.clear = async function clear() {
+  P.clear = function clear() {
+    return serialize(clearSettings);
+  };
+
+  async function clearSettings() {
     if (!chrome.proxy || !chrome.proxy.settings) return { ok: false, message: '不可用' };
     try {
       await chrome.proxy.settings.clear({});
-      return { ok: true, message: '已清除代理设置' };
+      return { ok: true, message: '已清除扩展的代理覆盖，恢复浏览器原有配置' };
     } catch (e) {
       return { ok: false, message: String((e && e.message) || e) };
     }
-  };
+  }
 
   /**
    * 诊断：对比「当前设置」与「AI API 直连」两种情况的耗时与可达性。
    *
-   * ★ 注意：测"直连"时**不切 direct 模式**（那会全局关代理、影响用户正在看的其他网站），
-   *   而是临时用 fixed_servers + bypassList(仅 API 域名) —— 只影响 AI API 这一条路。
+   * 仅在能完整保留现有 fixed_servers 规则时，临时追加 API bypass。
+   * system/PAC 无法在不改变其他流量路由的前提下改写，因此只测当前网络。
    */
-  P.diagnose = async function diagnose(cfg) {    const base = String(cfg.baseUrl || '').trim().replace(/\/+$/, '');
+  P.diagnose = function diagnose(cfg) {
+    return serialize(() => diagnoseSettings(cfg));
+  };
+
+  async function diagnoseSettings(cfg) {
+    const base = String(cfg.baseUrl || '').trim().replace(/\/+$/, '');
     const results = [];
 
     const probe = async (label) => {
       const t0 = Date.now();
+      const ctl = new AbortController();
+      const timer = setTimeout(() => ctl.abort(), 15000);
       try {
-        const ctl = new AbortController();
-        const timer = setTimeout(() => ctl.abort(), 15000);
         const res = await fetch(base + '/models', {
           method: 'GET',
           headers: { Authorization: 'Bearer ' + (cfg.apiKey || '') },
           signal: ctl.signal,
         });
-        clearTimeout(timer);
         const ms = Date.now() - t0;
         // 401 说明网络通、只是 key 问题 => 判定「可达」
         results.push({ label, ok: res.status < 500, status: res.status, ms: ms });
@@ -195,26 +215,51 @@
           ms: Date.now() - t0,
           err: String((e && e.message) || e),
         });
+      } finally {
+        clearTimeout(timer);
       }
     };
 
     // 1) 当前设置下测一次
     await probe('当前网络设置');
 
-    // 2) 临时让 API 直连（只影响 API 域名，不动其他流量）
+    const skip = (reason) => {
+      results.push({
+        label: 'API 直连', skipped: true, ok: null, status: 0, ms: 0,
+        err: '未执行直连对比：' + reason + '；未更改浏览器代理设置',
+      });
+      return results;
+    };
+    if (!chrome.proxy || !chrome.proxy.settings) return skip('当前环境不支持代理设置');
+
+    // 2) 保留原有代理服务器和其他 bypass，仅让 API 域名直连。
     const apiHost = P.extractHost(cfg.baseUrl);
-    const prev = await P.get();
-    const tempDirect = await P.apply(
-      Object.assign({}, cfg, { proxyMode: 'custom', proxyHost: '127.0.0.1', proxyPort: 1 }),
-      [apiHost]
-    );
-    if (tempDirect.ok) {
-      await probe('API 直连');
-      // 恢复原状
-      await P.apply(cfg);
+    if (!apiHost) return skip('无法识别 API 域名');
+    const previous = await chrome.proxy.settings.get({});
+    const value = previous && previous.value;
+    if (!value || value.mode !== 'fixed_servers' || !value.rules) {
+      return skip('当前不是可安全保留的固定代理模式');
     }
-    void prev;
+    if (!['controlled_by_this_extension', 'controllable_by_this_extension'].includes(previous.levelOfControl)) {
+      return skip('当前代理由其他扩展或策略控制');
+    }
+    const snapshot = JSON.parse(JSON.stringify(value));
+    const temporary = JSON.parse(JSON.stringify(snapshot));
+    const bypass = temporary.rules.bypassList || [];
+    if (!bypass.includes(apiHost)) bypass.push(apiHost);
+    temporary.rules.bypassList = bypass;
+    try {
+      await chrome.proxy.settings.set({ value: temporary, scope: 'regular' });
+      await probe('API 直连');
+    } finally {
+      // 原先由本扩展控制时恢复完整规则；否则清除临时覆盖，让原控制源继续生效。
+      if (previous.levelOfControl === 'controlled_by_this_extension') {
+        await chrome.proxy.settings.set({ value: snapshot, scope: 'regular' });
+      } else {
+        await chrome.proxy.settings.clear({ scope: 'regular' });
+      }
+    }
 
     return results;
-  };
+  }
 })(typeof window !== 'undefined' ? window : self);

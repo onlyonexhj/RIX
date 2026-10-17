@@ -220,6 +220,16 @@ eq('本次临时要求也生效', p.system.includes('本次要简短'), true);
 p = XAI.buildPrompt(tweet, Object.assign({}, cfg, { promptFormat: 'plain' }), {});
 eq('plain：序号格式要求', p.system.includes('「1. 」'), true);
 eq('plain：user 补媒体提示', p.user.includes('附带媒体'), true);
+p = XAI.buildPrompt(tweet, Object.assign({}, cfg, {
+  style: 'auto', promptFormat: 'plain', systemPrompt: '自定义系统提示', count: 4,
+}), {});
+eq('auto 自定义模板 plain 仍要求编号与条数',
+  p.system.includes('4 条回复') && p.system.includes('「1. 」'), true);
+p = XAI.buildPrompt(tweet, Object.assign({}, cfg, {
+  style: 'auto', promptFormat: 'plain', systemPrompt: '自定义：{{outputFormat}}', count: 2,
+}), {});
+eq('auto 自定义模板已有格式变量时不重复追加',
+  (p.system.match(/以「1\. 」「2\. 」/g) || []).length, 1);
 
 // 10g 边界
 eq('条数上限 8',
@@ -300,8 +310,8 @@ eq('注释行(keepalive)被跳过',
   SSE.feed([': keep-alive\n\n', d('K')]).full, 'K');
 eq('流式结果可被 parseReplyList 解析',
   U.parseReplyList(SSE.feed([d('["甲","乙"]')]).full, 2), ['甲', '乙']);
-eq('流式 JSON 半成品解析为空（不报错）',
-  U.parseReplyList(SSE.feed([d('["甲",')]).full, 2).length >= 0, true);
+eq('流式 JSON 半成品仅开放完整字符串',
+  U.parseCompleteReplyList(SSE.feed([d('["甲",')]).full), ['甲']);
 
 console.log('\n【13】代理配置');
 const proxy = sandbox.window.XAI.proxy;
@@ -311,7 +321,7 @@ const base = {
   model: 'glm-4.6',
 };
 
-eq('auto -> system（扩展不改用户设置）',
+eq('auto 构建值仅作占位（apply 实际清除扩展覆盖）',
   proxy.buildScheme({ proxyMode: 'auto' }).mode, 'system');
 eq('direct -> direct', proxy.buildScheme({ proxyMode: 'direct' }).mode, 'direct');
 

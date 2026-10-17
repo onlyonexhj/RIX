@@ -54,6 +54,30 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       XAI.getConfig().then((c) => sendResponse({ ok: true, data: maskConfig(c) }));
       return true;
 
+    case 'xai:setConfig':
+      XAI.setConfig(msg.payload || {})
+        .then(async (cfg) => {
+          if (msg.payload && (msg.payload.enabled === false || msg.payload.proxyMode === 'auto')) {
+            const result = await XAI.proxy.clear();
+            if (!result.ok) throw new Error('配置已保存，但清理代理失败：' + result.message);
+          }
+          return cfg;
+        })
+        .then((cfg) => sendResponse({ ok: true, data: cfg }))
+        .catch((e) => sendResponse({ ok: false, error: String((e && e.message) || e) }));
+      return true;
+
+    case 'xai:resetConfig':
+      XAI.resetConfig()
+        .then(async (cfg) => {
+          const result = await XAI.proxy.clear();
+          if (!result.ok) throw new Error('配置已重置，但清理代理失败：' + result.message);
+          return cfg;
+        })
+        .then((cfg) => sendResponse({ ok: true, data: cfg }))
+        .catch((e) => sendResponse({ ok: false, error: String((e && e.message) || e) }));
+      return true;
+
     case 'xai:previewPrompt':
       // 设置页实时预览：把模板用示例推文渲染出来（不消耗 API 额度）
       try {
@@ -156,6 +180,13 @@ function cancelById(taskId) {
   }
 }
 
+function throwIfAborted(signal) {
+  if (!signal.aborted) return;
+  const error = new Error('已中止');
+  error.name = 'AbortError';
+  throw error;
+}
+
 /* ================================================================== *
  * 调用：OpenAI 兼容 / Anthropic
  * ================================================================== */
@@ -214,7 +245,7 @@ async function callOpenAI(cfg, prompt, signal) {
 
   const text = await res.text();
   if (!res.ok) {
-    throw new Error('HTTP ' + res.status + ' ' + (safeParse(text).error?.message || text.slice(0, 300)) + visionHint(prompt));
+    throw new Error('HTTP ' + res.status + ' ' + (safeParse(text)?.error?.message || text.slice(0, 300)) + visionHint(prompt));
   }
   const json = safeParse(text);
   if (!json) throw new Error('返回非 JSON：' + text.slice(0, 200));
@@ -262,7 +293,7 @@ async function callAnthropic(cfg, prompt, signal) {
 
   const text = await res.text();
   if (!res.ok) {
-    throw new Error('HTTP ' + res.status + ' ' + (safeParse(text).error?.message || text.slice(0, 300)) + visionHint(prompt));
+    throw new Error('HTTP ' + res.status + ' ' + (safeParse(text)?.error?.message || text.slice(0, 300)) + visionHint(prompt));
   }
   const json = safeParse(text);
   if (!json) throw new Error('返回非 JSON：' + text.slice(0, 200));
@@ -289,24 +320,81 @@ function visionHint(prompt) {
     : '';
 }
 
-/** 生成前把代理设置应用到浏览器（用户改过代理后立即生效，无需重启扩展） */
-let proxyAppliedAt = 0;
-let proxySig = '';
+/** 所有代理写入经过 proxy 模块的同一队列，等待诊断恢复原状后再生成。 */
 async function ensureProxy(cfg) {
   try {
     if (!XAI.proxy || !XAI.proxy.apply) return;
-    // 同一配置 10 秒内不重复设置（chrome.proxy 写入有开销）
-    const sig = [cfg.proxyMode, cfg.proxyHost, cfg.proxyPort, cfg.proxyScheme, cfg.baseUrl].join('|');
-    if (sig === proxySig && Date.now() - proxyAppliedAt < 10000) return;
     // 传入 apiHost，让 custom 模式能把 AI 域名加进 bypassList（精准直连）
     await XAI.proxy.apply(
       Object.assign({}, cfg, { apiHost: XAI.proxy.extractHost(cfg.baseUrl) })
     );
-    proxySig = sig;
-    proxyAppliedAt = Date.now();
   } catch (e) {
     /* 代理失败不应阻断生成，降级为默认网络 */
   }
+}
+
+/** 按 SSE 行协议读取；CRLF 即使跨 chunk 也只算一次换行。 */
+async function readSSE(body, onEvent) {
+  const reader = body.getReader();
+  const decoder = new TextDecoder('utf-8');
+  let buffer = '';
+  let event = '';
+  let data = [];
+  let stopped = false;
+  let completed = false;
+
+  const line = (value) => {
+    if (!value) {
+      if (data.length) stopped = onEvent({ event, data: data.join('\n') }) === false;
+      event = '';
+      data = [];
+      return;
+    }
+    if (value.startsWith(':')) return;
+    const colon = value.indexOf(':');
+    const field = colon < 0 ? value : value.slice(0, colon);
+    let text = colon < 0 ? '' : value.slice(colon + 1);
+    if (text.startsWith(' ')) text = text.slice(1);
+    if (field === 'event') event = text;
+    else if (field === 'data') data.push(text);
+  };
+
+  const consume = (text, final) => {
+    buffer += text;
+    let start = 0;
+    for (let i = 0; i < buffer.length && !stopped; i++) {
+      const char = buffer[i];
+      if (char !== '\r' && char !== '\n') continue;
+      if (char === '\r' && i + 1 === buffer.length && !final) break;
+      line(buffer.slice(start, i));
+      if (char === '\r' && buffer[i + 1] === '\n') i++;
+      start = i + 1;
+    }
+    buffer = buffer.slice(start);
+  };
+
+  try {
+    while (!stopped) {
+      const { done, value } = await reader.read();
+      if (done) {
+        completed = true;
+        consume(decoder.decode(), true);
+        break;
+      }
+      consume(decoder.decode(value, { stream: true }), false);
+    }
+  } finally {
+    if (!completed) {
+      try { await reader.cancel(); } catch (e) { /* 请求已中止 */ }
+    }
+    reader.releaseLock();
+  }
+}
+
+function throwStreamError(obj, event) {
+  if (!obj || (!obj.error && obj.type !== 'error' && event !== 'error')) return;
+  const error = obj.error || obj;
+  throw new Error('流式请求失败：' + (typeof error === 'string' ? error : error.message || error.type || '接口返回错误'));
 }
 
 /**
@@ -363,7 +451,7 @@ async function callOpenAIStream(cfg, prompt, signal, onDelta) {
 
   if (!res.ok) {
     const t = await res.text().catch(() => '');
-    throw new Error('HTTP ' + res.status + ' ' + (safeParse(t).error?.message || t.slice(0, 300)) + visionHint(prompt));
+    throw new Error('HTTP ' + res.status + ' ' + (safeParse(t)?.error?.message || t.slice(0, 300)) + visionHint(prompt));
   }
   if (!res.body) {
     // 极少数环境不支持流式读取 -> 退化为一次性读取
@@ -372,58 +460,28 @@ async function callOpenAIStream(cfg, prompt, signal, onDelta) {
     return t;
   }
 
-  const reader = res.body.getReader();
-  const decoder = new TextDecoder('utf-8');
   let full = '';
-  let buf = '';
-  let firstChunkAt = 0;
   let reasoningChars = 0;
 
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buf += decoder.decode(value, { stream: true });
+  await readSSE(res.body, ({ event, data }) => {
+    if (data.trim() === '[DONE]') return false;
+    const obj = safeParse(data);
+    throwStreamError(obj, event);
+    const ch = obj && obj.choices && obj.choices[0];
+    if (!ch) return;
 
-    // SSE 以空行分隔事件
-    let idx;
-    while ((idx = buf.indexOf('\n\n')) !== -1) {
-      const rawEvt = buf.slice(0, idx);
-      buf = buf.slice(idx + 2);
-
-      for (const line of rawEvt.split('\n')) {
-        const s = line.trim();
-        if (!s || s.startsWith(':')) continue;
-        if (!s.startsWith('data:')) continue;
-        const data = s.slice(5).trim();
-        if (data === '[DONE]') continue;
-
-        let obj;
-        try {
-          obj = JSON.parse(data);
-        } catch (e) {
-          continue; // 半包/坏行，跳过
-        }
-
-        const ch = obj.choices && obj.choices[0];
-        if (!ch) continue;
-
-        // 推理内容单独统计（GLM 等会先吐 reasoning_content）
-        const rc = ch.delta && ch.delta.reasoning_content;
-        if (rc) {
-          reasoningChars += rc.length;
-          if (onDelta) onDelta(full, { thinking: true, reasoningChars });
-          continue;
-        }
-
-        const piece = ch.delta && ch.delta.content;
-        if (piece) {
-          if (!firstChunkAt) firstChunkAt = Date.now();
-          full += piece;
-          if (onDelta) onDelta(full, { thinking: false, chars: full.length });
-        }
-      }
+    // 同一 delta 可以同时含推理与正文，不能因推理字段跳过正文。
+    const rc = ch.delta && ch.delta.reasoning_content;
+    if (rc) {
+      reasoningChars += rc.length;
+      if (onDelta) onDelta(full, { thinking: true, reasoningChars });
     }
-  }
+    const piece = ch.delta && ch.delta.content;
+    if (piece) {
+      full += piece;
+      if (onDelta) onDelta(full, { thinking: false, chars: full.length });
+    }
+  });
 
   // 流式下 finish_reason=length 且无正文 => 同样是 max_tokens 被推理吃光
   if (!full && reasoningChars > 0) {
@@ -467,7 +525,7 @@ async function callAnthropicStream(cfg, prompt, signal, onDelta) {
 
   if (!res.ok) {
     const t = await res.text().catch(() => '');
-    throw new Error('HTTP ' + res.status + ' ' + (safeParse(t).error?.message || t.slice(0, 300)) + visionHint(prompt));
+    throw new Error('HTTP ' + res.status + ' ' + (safeParse(t)?.error?.message || t.slice(0, 300)) + visionHint(prompt));
   }
   if (!res.body) {
     const t = await res.text();
@@ -475,44 +533,20 @@ async function callAnthropicStream(cfg, prompt, signal, onDelta) {
     return t;
   }
 
-  const reader = res.body.getReader();
-  const decoder = new TextDecoder('utf-8');
   let full = '';
-  let buf = '';
-
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buf += decoder.decode(value, { stream: true });
-
-    let idx;
-    while ((idx = buf.indexOf('\n\n')) !== -1) {
-      const rawEvt = buf.slice(0, idx);
-      buf = buf.slice(idx + 2);
-
-      let evtName = '';
-      const dataLines = [];
-      for (const line of rawEvt.split('\n')) {
-        const s = line.trim();
-        if (s.startsWith('event:')) evtName = s.slice(6).trim();
-        else if (s.startsWith('data:')) dataLines.push(s.slice(5).trim());
-      }
-      if (!dataLines.length) continue;
-      let obj;
-      try {
-        obj = JSON.parse(dataLines.join('\n'));
-      } catch (e) {
-        continue;
-      }
-
-      if (evtName === 'content_block_delta' && obj.delta && obj.delta.type === 'text_delta') {
-        full += obj.delta.text || '';
-        if (onDelta) onDelta(full, { thinking: false, chars: full.length });
-      } else if (evtName === 'content_block_delta' && obj.delta && obj.delta.type === 'thinking_delta') {
-        if (onDelta) onDelta(full, { thinking: true });
-      }
+  await readSSE(res.body, ({ event, data }) => {
+    const obj = safeParse(data);
+    throwStreamError(obj, event);
+    if (!obj) return;
+    const type = event || obj.type;
+    if (type === 'message_stop') return false;
+    if (type === 'content_block_delta' && obj.delta && obj.delta.type === 'text_delta') {
+      full += obj.delta.text || '';
+      if (onDelta) onDelta(full, { thinking: false, chars: full.length });
+    } else if (type === 'content_block_delta' && obj.delta && obj.delta.type === 'thinking_delta') {
+      if (onDelta) onDelta(full, { thinking: true });
     }
-  }
+  });
   return full;
 }
 
@@ -520,11 +554,7 @@ async function callAnthropicStream(cfg, prompt, signal, onDelta) {
  * 对外：生成入口
  * ================================================================== */
 
-async function handleGenerate(payload) {
-  const cfg = await XAI.getConfig();
-  if (!cfg.enabled) throw new Error('插件已在设置中停用');
-  if (!cfg.apiKey) throw new Error('未配置 API Key，请点击扩展图标打开设置');
-
+async function handleGenerate(payload = {}) {
   const tweet = payload.tweet || {};
   const extra = payload.extra || {};
   const taskId = payload.taskId || U.uid();
@@ -532,21 +562,19 @@ async function handleGenerate(payload) {
   const controller = new AbortController();
   inflight.set(taskId, controller);
 
-  // 超时
-  const timeoutMs = (Number(cfg.timeoutSec) || 90) * 1000;
-  const timer = setTimeout(() => {
-    try {
-      controller.abort();
-    } catch (e) {
-      /* noop */
-    }
-  }, timeoutMs);
-
+  let timer;
   const started = Date.now();
   try {
+    // 任务必须在第一次 await 之前登记，配置读取期间也接受取消。
+    const cfg = await XAI.getConfig();
+    throwIfAborted(controller.signal);
+    if (!cfg.enabled) throw new Error('插件已在设置中停用');
+    if (!cfg.apiKey) throw new Error('未配置 API Key，请点击扩展图标打开设置');
+    timer = setTimeout(() => controller.abort(), (Number(cfg.timeoutSec) || 90) * 1000);
     const prompt = buildPrompt(tweet, cfg, extra);
     const fn = cfg.provider === 'anthropic' ? callAnthropic : callOpenAI;
     await ensureProxy(cfg);
+    throwIfAborted(controller.signal);
     const raw = await fn(cfg, prompt, controller.signal);
 
     const parsed = U.parseReplyList(raw, prompt.n);
@@ -572,7 +600,7 @@ async function handleGenerate(payload) {
     throw e;
   } finally {
     clearTimeout(timer);
-    inflight.delete(taskId);
+    if (inflight.get(taskId) === controller) inflight.delete(taskId);
   }
 }
 
@@ -581,17 +609,16 @@ async function handleGenerate(payload) {
  * 消息协议：content -> SW { taskId, tweet, extra }
  *          SW -> content { type:'delta'|'thinking'|'done'|'error', ... }
  */
-async function handleGenerateStream(port, payload) {
-  const cfg = await XAI.getConfig();
+async function handleGenerateStream(port, payload = {}) {
   const tweet = payload.tweet || {};
   const extra = payload.extra || {};
   const taskId = payload.taskId || U.uid();
 
   const controller = new AbortController();
   inflight.set(taskId, controller);
-  const timeoutMs = (Number(cfg.timeoutSec) || 90) * 1000;
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  let timer;
   const started = Date.now();
+  const onDisconnect = () => controller.abort();
 
   const send = (msg) => {
     try {
@@ -602,19 +629,15 @@ async function handleGenerateStream(port, payload) {
   };
 
   try {
+    // 在读取配置前监听断开，避免面板已关闭后仍然启动收费请求。
+    port.onDisconnect.addListener(onDisconnect);
+    const cfg = await XAI.getConfig();
+    throwIfAborted(controller.signal);
     if (!cfg.enabled) throw new Error('插件已在设置中停用');
     if (!cfg.apiKey) throw new Error('未配置 API Key，请点击扩展图标打开设置');
+    timer = setTimeout(() => controller.abort(), (Number(cfg.timeoutSec) || 90) * 1000);
 
     const prompt = buildPrompt(tweet, cfg, extra);
-
-    // 面板断开 -> 立刻中止，避免白烧 token
-    port.onDisconnect.addListener(() => {
-      try {
-        controller.abort();
-      } catch (e) {
-        /* noop */
-      }
-    });
 
     const onDelta = (full, meta) => {
       if (meta && meta.thinking) send({ type: 'thinking' });
@@ -623,6 +646,7 @@ async function handleGenerateStream(port, payload) {
 
     const fnStream = cfg.provider === 'anthropic' ? callAnthropicStream : callOpenAIStream;
     await ensureProxy(cfg);
+    throwIfAborted(controller.signal);
     const raw = await fnStream(cfg, prompt, controller.signal, onDelta);
 
     const parsed = U.parseReplyList(raw, prompt.n);
@@ -647,7 +671,8 @@ async function handleGenerateStream(port, payload) {
     send({ type: 'error', error: aborted ? '已中止' : String((e && e.message) || e) });
   } finally {
     clearTimeout(timer);
-    inflight.delete(taskId);
+    if (inflight.get(taskId) === controller) inflight.delete(taskId);
+    port.onDisconnect.removeListener(onDisconnect);
   }
 }
 

@@ -142,15 +142,23 @@
   /** 判断该弹层是「回复」还是「新发帖」 */
   function detectIsReply(dialog, editor) {
     if (!dialog) return false;
-    // 弹层内出现引用推文卡片 / 上下文条 → 回复
-    if (dialog.querySelector('[data-testid="quoteTweet"]')) return true;
+    // 回复上下文条或明确的弹层标签是强证据。
     if (dialog.querySelector('[data-testid="replyContextBar"]')) return true;
-    // 编辑器上方存在 tweetText（被回复的推文正文）
-    const tt = dialog.querySelector('[data-testid="tweetText"]');
-    if (tt && tt !== editor) return true;
-    // aria-label 提示
     const al = dialog.getAttribute('aria-label') || '';
     if (/回复|Reply/i.test(al)) return true;
+
+    // 普通引用发帖也含 quoteTweet/tweetText，但引用卡在编辑器之后。
+    // 只接受编辑器之前、且不属于任意草稿编辑器的原推节点。
+    if (!editor || !editor.compareDocumentPosition) return false;
+    const candidates = dialog.querySelectorAll(
+      '[data-testid="quoteTweet"], [data-testid="tweetText"], [data-testid="tweet"]'
+    );
+    for (const node of candidates) {
+      if (node === editor || node.contains(editor) || editor.contains(node)) continue;
+      if (node.closest('[contenteditable="true"]')) continue;
+      // DOCUMENT_POSITION_FOLLOWING = 4：editor 在该原推节点之后。
+      if (node.compareDocumentPosition(editor) & 4) return true;
+    }
     return false;
   }
   D.detectIsReply = detectIsReply;
@@ -178,29 +186,31 @@
    */
   D.extractTargetTweet = function extractTargetTweet(composer) {
     const dialog = composer && composer.dialog;
-    if (!dialog) return null;
+    const editor = composer && composer.editor;
+    if (!dialog || !editor) return null;
 
-    // 在弹层内找到那条被回复的推文
+    const isOriginal = (node) => {
+      if (node === editor || node.contains(editor) || editor.contains(node)) return false;
+      if (node.closest('[contenteditable="true"]')) return false;
+      return !!(node.compareDocumentPosition && (node.compareDocumentPosition(editor) & 4));
+    };
+
+    // 原推自身正文在嵌套引用卡之前；不能先选任意 quoteTweet，
+    // 否则回复「评论 + 引用」时会把引用卡的作者/正文当成回复对象。
     let card = null;
-    const q = dialog.querySelector('[data-testid="quoteTweet"]');
-    if (q) card = q;
-
-    if (!card) {
-      // 弹层内所有 tweetText，取第一个不在编辑器里的
-      const eds = new Set();
-      const ed = composer.editor;
-      if (ed) eds.add(ed);
-      const texts = Array.prototype.slice.call(dialog.querySelectorAll('[data-testid="tweetText"]'));
-      for (const t of texts) {
-        if (ed && (t === ed || ed.contains(t) || t.contains(ed))) continue;
-        card = t;
-        break;
-      }
+    for (const text of dialog.querySelectorAll('[data-testid="tweetText"]')) {
+      if (!isOriginal(text)) continue;
+      const holder = text.closest('[data-testid="tweet"]');
+      card = holder && dialog.contains(holder) && isOriginal(holder) ? holder : text;
+      break;
     }
     if (!card) {
-      // 有些版本弹层里原推文不带 tweetText，用 tweet 容器兜底
-      const holder = dialog.querySelector('[data-testid="tweet"]');
-      if (holder) card = holder;
+      // 无文字的图片/视频推文仍通过编辑器之前的卡片读取作者和媒体。
+      for (const holder of dialog.querySelectorAll('[data-testid="tweet"], [data-testid="quoteTweet"]')) {
+        if (!isOriginal(holder)) continue;
+        card = holder;
+        break;
+      }
     }
     if (!card) return null;
 

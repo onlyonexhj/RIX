@@ -226,7 +226,7 @@
     // plain 模式：放宽 JSON 硬约束，改为序号列表输出
     // （auto 模板的 {{outputFormat}} 已按 promptFormat 生成对应格式段，格式段跳过避免重复）
     if (cfg.promptFormat === 'plain') {
-      if (!isAuto) {
+      if (!isAuto || !/\{\{\s*outputFormat\s*\}\}/.test(sysTpl)) {
         sys +=
           '\n\n输出格式：直接给出 ' +
           n +

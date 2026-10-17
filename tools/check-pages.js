@@ -22,7 +22,7 @@ const PROVIDES = {
   'config.js': [
     'defaults', 'providerPresets', 'styles', 'lengths', 'langs', 'promptVars',
     'defaultSystemTemplate', 'defaultUserTemplate', 'storageKey',
-    'storageSessionKey', 'getConfig', 'setConfig',
+    'storageSessionKey', 'getConfig', 'setConfig', 'resetConfig',
   ],
   'utils.js': [
     'parseReplyList', 'detectLang', 'cleanText', 'escapeHtml', 'fmtDuration',

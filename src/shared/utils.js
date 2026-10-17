@@ -138,6 +138,69 @@
     return n > 0 ? dedup.slice(0, n) : dedup;
   };
 
+  U.isSkipReply = (text) => /^\s*skip\s*$/i.test(String(text || ''));
+
+  /** 流式预览只接受已经闭合的 JSON 字符串，不把半包交给普通文本兜底。 */
+  U.parseCompleteReplyList = function parseCompleteReplyList(raw) {
+    const text = String(raw || '');
+    for (let start = 0; start < text.length; start++) {
+      if (text[start] !== '[') continue;
+      const values = [];
+      let i = start + 1;
+      let invalid = false;
+      while (i < text.length) {
+        while (/\s/.test(text[i] || '') && i < text.length) i++;
+        if (i === text.length || text[i] === ']') break;
+        if (text[i] !== '"') { invalid = true; break; }
+        const begin = i++;
+        let escaped = false;
+        let end = -1;
+        for (; i < text.length; i++) {
+          if (escaped) escaped = false;
+          else if (text[i] === '\\') escaped = true;
+          else if (text[i] === '"') { end = i++; break; }
+        }
+        if (end < 0) break;
+        let value;
+        try { value = JSON.parse(text.slice(begin, end + 1)).trim(); }
+        catch (e) { invalid = true; break; }
+        if (value && !U.isSkipReply(value) && !values.includes(value)) values.push(value);
+        while (/\s/.test(text[i] || '') && i < text.length) i++;
+        if (i === text.length || text[i] === ']') break;
+        if (text[i++] !== ',') { invalid = true; break; }
+      }
+      if (!invalid) return values;
+    }
+    return [];
+  };
+
+  /** URL 可带查询参数或不同域名；无链接时使用完整正文而非截断前缀。 */
+  U.tweetKey = function tweetKey(tweet) {
+    if (!tweet) return '';
+    const status = String(tweet.url || '').match(/\/status\/(\d+)/);
+    if (status) return 'status:' + status[1];
+    return JSON.stringify([
+      String(tweet.handle || tweet.author || '').toLowerCase(),
+      U.cleanText(tweet.text),
+      (tweet.images || []).map((url) => String(url).split('?')[0]),
+    ]);
+  };
+
+  U.sameTweet = function sameTweet(a, b) {
+    if (!a || !b) return false;
+    if (a === b) return true;
+    const aStatus = String(a.url || '').match(/\/status\/(\d+)/);
+    const bStatus = String(b.url || '').match(/\/status\/(\d+)/);
+    if (aStatus && bStatus) return aStatus[1] === bStatus[1];
+    const aName = String(a.handle || a.author || '').toLowerCase();
+    const bName = String(b.handle || b.author || '').toLowerCase();
+    if (!aName || aName !== bName || U.cleanText(a.text) !== U.cleanText(b.text)) return false;
+    if (U.cleanText(a.text)) return true;
+    const aImages = (a.images || []).map((url) => String(url).split('?')[0]);
+    const bImages = (b.images || []).map((url) => String(url).split('?')[0]);
+    return aImages.length > 0 && JSON.stringify(aImages) === JSON.stringify(bImages);
+  };
+
   /** 推断语言：返回 zh / en / ja / ko / unknown */
   U.detectLang = function detectLang(text) {
     const s = String(text || '');

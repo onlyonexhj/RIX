@@ -231,10 +231,48 @@
     return Object.assign({}, XAI.defaults, stored);
   };
 
-  XAI.setConfig = async function setConfig(patch) {
-    const cur = await XAI.getConfig();
-    const next = Object.assign({}, cur, patch);
-    await chrome.storage.local.set({ [XAI.storageKey]: next });
-    return next;
+  // 所有页面都由同一个 service worker 写入，避免多个页面读旧快照后相互覆盖。
+  // 无 runtime 的预览/测试环境仍可使用本地队列。
+  let configWrites = Promise.resolve();
+
+  function writeConfig(patch, reset) {
+    const changes = {};
+    for (const key of Object.keys(patch || {})) {
+      if (Object.prototype.hasOwnProperty.call(XAI.defaults, key)) changes[key] = patch[key];
+    }
+    const pending = configWrites.then(async () => {
+      const current = reset ? XAI.defaults : await XAI.getConfig();
+      const next = Object.assign({}, current, changes);
+      await chrome.storage.local.set({ [XAI.storageKey]: next });
+      return next;
+    });
+    // 一次存储失败不能阻断后续保存；错误仍由本次调用的 Promise 返回。
+    configWrites = pending.catch(() => {});
+    return pending;
+  }
+
+  async function sendConfigMessage(type, payload) {
+    const response = await chrome.runtime.sendMessage({ type, payload });
+    if (!response || !response.ok) {
+      throw new Error((response && response.error) || '保存配置失败，请重新加载扩展');
+    }
+    return response.data;
+  }
+
+  function usesConfigWorker() {
+    return typeof window !== 'undefined' && typeof chrome !== 'undefined' &&
+      chrome.runtime && typeof chrome.runtime.sendMessage === 'function';
+  }
+
+  XAI.setConfig = function setConfig(patch) {
+    return usesConfigWorker()
+      ? sendConfigMessage('xai:setConfig', patch)
+      : writeConfig(patch, false);
+  };
+
+  XAI.resetConfig = function resetConfig() {
+    return usesConfigWorker()
+      ? sendConfigMessage('xai:resetConfig')
+      : writeConfig({}, true);
   };
 })(typeof window !== 'undefined' ? window : self);

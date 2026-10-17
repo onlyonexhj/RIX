@@ -20,8 +20,11 @@
 
   let cfg = XAI.defaults;
   let lastComposer = null; // 记录上一次的弹层节点，识别「新开/重开」
-  let lastTweet = null; // 点击回复气泡时缓存的推文（弹层内提取失败时的兜底）
+  let replyClick = null; // 一次性兜底，只供紧接着打开的回复弹层消费
   let hoverBtn = null;
+  let hoverArticle = null;
+  let pendingOpenTimer = 0;
+  let watcherRevision = 0;
 
   /* ------------------------------------------------------------------ *
    * 初始化
@@ -49,9 +52,18 @@
 
   function applyEnabled() {
     if (!cfg.enabled) {
+      invalidatePendingOpen();
+      lastComposer = null;
+      replyClick = null;
       P.close();
       hideHoverBtn();
     }
+  }
+
+  function invalidatePendingOpen() {
+    watcherRevision++;
+    if (pendingOpenTimer) clearTimeout(pendingOpenTimer);
+    pendingOpenTimer = 0;
   }
 
   /* ------------------------------------------------------------------ *
@@ -68,31 +80,47 @@
       // 只跟真实弹层（role=dialog）走：时间线顶部的内联编辑器不算。
       // 否则发完评论回到列表页，弹层关闭 -> 内联编辑器被当成「新弹层」，
       // 会误开面板并自动生成（2026-10-17 用户实测踩中）
-      if (!composer || !composer.dialog) {
+      if (!composer || !composer.dialog || !composer.isReply) {
         if (lastComposer) {
+          invalidatePendingOpen();
           lastComposer = null;
+          replyClick = null;
           if (P.isOpen()) P.close();
         }
+        if (composer && composer.dialog && !composer.isReply) {
+          replyClick = null;
+          if (P.isOpen()) P.close();
+        }
+        if (replyClick && Date.now() > replyClick.expiresAt) replyClick = null;
         return;
       }
 
       // 弹层节点变了 → 认为是新开的一次发帖
       const node = composer.dialog || composer.editor;
       if (node !== lastComposer) {
+        invalidatePendingOpen();
         lastComposer = node;
+        const revision = watcherRevision;
+        const fallback = replyClick;
 
         // 弹层刚挂上，React 可能还没渲染完推文内容，等一拍再提取
-        setTimeout(() => {
-          if (!cfg.enabled) return;
+        pendingOpenTimer = setTimeout(async () => {
+          pendingOpenTimer = 0;
+          if (!cfg.enabled || revision !== watcherRevision) return;
           const fresh = D.findComposer();
-          if (!fresh) return;
+          if (!fresh || !fresh.isReply || fresh.dialog !== node) {
+            if (replyClick === fallback) replyClick = null;
+            return;
+          }
 
           let tweet = D.extractTargetTweet(fresh);
-          if (!tweet && lastTweet) {
-            // 兜底：用点击回复按钮时抓到的那条
-            tweet = lastTweet;
+          if (!tweet && fallback && fallback.expiresAt >= Date.now()) tweet = fallback.tweet;
+          if (replyClick === fallback) replyClick = null;
+          try {
+            if (await P.open(fresh, tweet)) P.autoGenerate();
+          } catch (e) {
+            U.toast('打开回复面板失败：' + String(e.message || e), 'err');
           }
-          P.open(fresh, tweet).then(() => P.autoGenerate());
         }, 260);
       }
     }, 400);
@@ -109,7 +137,7 @@
     if (D.isReplyButton(e.target)) {
       const art = D.findTweetArticle(e.target);
       const t = D.extractTweetFromArticle(art);
-      if (t) lastTweet = t;
+      replyClick = t ? { tweet: t, expiresAt: Date.now() + 10000 } : null;
       return;
     }
 
@@ -122,17 +150,20 @@
 
   function onHover(e) {
     if (!cfg.enabled || !cfg.showFloatingButton) return;
+    if (hoverBtn && hoverBtn.contains(e.target)) return;
 
     const art = D.findTweetArticle(e.target);
     if (!art) {
-      if (hoverBtn && !hoverBtn.contains(e.relatedTarget)) hideHoverBtn();
+      hideHoverBtn();
       return;
     }
     // 已经在弹层内就不显示
     if (e.target.closest('div[role="dialog"]')) return hideHoverBtn();
 
     if (hoverBtn && hoverBtn.dataset.tid === tid(art)) {
+      hoverArticle = art;
       positionHoverBtn(art);
+      hoverBtn.classList.add('is-on');
       return;
     }
     hideHoverBtn();
@@ -142,6 +173,7 @@
   function onHoverOut(e) {
     if (!hoverBtn) return;
     if (e.relatedTarget && hoverBtn.contains(e.relatedTarget)) return;
+    if (e.relatedTarget && hoverArticle && hoverArticle.contains(e.relatedTarget)) return;
     hideHoverBtn();
   }
 
@@ -157,17 +189,18 @@
       hoverBtn.className = 'xai-float';
       hoverBtn.textContent = '✦ AI 回复';
       hoverBtn.title = 'AI 生成回复';
-      hoverBtn.addEventListener('click', (ev) => {
+      hoverBtn.addEventListener('click', async (ev) => {
         ev.preventDefault();
         ev.stopPropagation();
-        const a = D.findTweetArticle(hoverBtn);
+        const a = hoverArticle && hoverArticle.isConnected ? hoverArticle : null;
         const t = D.extractTweetFromArticle(a);
-        if (t) lastTweet = t;
         // 点悬浮按钮 = 等价于点回复气泡：直接开面板
-        openFor(t);
+        try { await openFor(t); }
+        catch (e) { U.toast('打开回复面板失败：' + String(e.message || e), 'err'); }
       });
       document.body.appendChild(hoverBtn);
     }
+    hoverArticle = art;
     hoverBtn.dataset.tid = tid(art);
     positionHoverBtn(art);
     hoverBtn.classList.add('is-on');
@@ -183,6 +216,7 @@
 
   function hideHoverBtn() {
     if (hoverBtn) hoverBtn.classList.remove('is-on');
+    hoverArticle = null;
   }
 
   /** 没有弹层时（用户直接点悬浮按钮）：自己造一个"伪编辑器"上下文，生成后仍需用户点回复来填入 */
@@ -193,17 +227,14 @@
     }
     // 先尝试真实弹层（点回复后才有编辑器）
     const c = D.findComposer();
-    if (c) {
-      await P.open(c, tweet);
-      P.autoGenerate();
+    if (c && c.dialog && c.isReply && U.sameTweet(D.extractTargetTweet(c), tweet)) {
+      if (await P.open(c, tweet)) P.autoGenerate();
       return;
     }
 
     // 无弹层：仍打开面板，但标记为"待填入"模式，
     // 用户点回复气泡后会自动用上次的生成结果
-    P.open(null, tweet);
-    P.setPendingTweet(tweet);
-    P.autoGenerate();
+    if (await P.open(null, tweet)) P.autoGenerate();
   }
 
   /* ------------------------------------------------------------------ */

@@ -103,7 +103,7 @@
         <div class="tip tip--info" style="display:none" id="netNote">
           💡 <b>挂 VPN 觉得慢？先看这两条：</b><br>
           ① 保持<b>流式输出</b>开启 —— 第一个字约 1 秒就能看到，不用干等全部生成完；<br>
-          ② 下面可以实测「走代理」和「强制直连」哪个更快。
+          ② 下面可以检测当前网络；仅在现有固定代理可安全保留时对比 AI 直连。
         </div>
 
         <div class="row">
@@ -118,8 +118,8 @@
         <div class="row">
           <label class="lb">代理模式</label>
           <select id="proxyMode" class="in">
-            <option value="auto">跟随系统默认（推荐，扩展不改任何设置）</option>
-            <option value="custom">AI 走直连，其他仍走代理（精准，推荐）</option>
+            <option value="auto">使用浏览器原有代理设置（推荐，释放扩展控制）</option>
+            <option value="custom">固定代理 + AI 域名直连（替换浏览器代理规则）</option>
             <option value="direct">全局直连（会关掉整个浏览器的代理）</option>
           </select>
         </div>
@@ -127,8 +127,8 @@
         <p class="tip tip--danger" id="directWarn" style="display:none">
           🚨 <b>「全局直连」会影响整个浏览器，不只是本扩展。</b><br>
           一旦应用，你<b>所有标签页</b>的流量都不再走代理 —— 正在看的其他网站也可能打不开。<br>
-          如果你只是想让 AI 接口快一点，请改用上面的 <b>「AI 走直连，其他仍走代理」</b>（需要填你的代理地址），
-          它只影响 AI 接口这一个域名。
+          若要保留其他站点的代理，需要核对并使用上面的固定代理模式。
+          固定代理也会替换浏览器现有的 PAC、分流与绕过规则。
         </p>
 
         <div id="proxyCustom" style="display:none">
@@ -152,14 +152,15 @@
           </div>
           <p class="tip">
             填你<b>原本在用的</b>代理地址（Clash / v2ray 本地端口，常见 7890 / 1080）。<br>
-            应用后：<b>AI 接口域名直连，其他所有网站照旧走这个代理</b> —— 只影响 AI 接口这一条路。
+            应用后：<b>AI 接口域名直连，其余网站全部走这个固定代理</b>。<br>
+            此设置会替换整个浏览器的现有 PAC、分流及绕过规则，请确认它适合所有标签页。
           </p>
         </div>
 
         <p class="tip tip--info">
           技术限制：浏览器 <code>fetch</code> 无法给单个请求指定代理，只能通过 <code>chrome.proxy</code> 改规则。
-          所以「AI 走直连」这个模式需要你填代理地址（它替你保留原有代理，只把 AI 域名绕过）。
-          点下方「恢复默认」可随时还原成你原来的网络设置。
+          代理字段仅作草稿，点「应用代理设置」并确认后才保存及生效；普通保存、测试和测速不会应用草稿。
+          点下方「恢复默认」可释放扩展的代理控制，回到浏览器原有设置。
         </p>
 
         <div class="row">
@@ -300,7 +301,7 @@
     </main>
 
     <footer class="ft">
-      <span id="saveState">所有改动自动保存</span>
+      <span id="saveState">普通设置自动保存；代理设置需单独应用</span>
       <button class="btn btn--pri btn--sm" id="save" type="button">保存</button>
     </footer>
   </div>
