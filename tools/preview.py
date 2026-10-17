@@ -90,7 +90,7 @@ RESULTS = [
     "这个我懂，AI 写得越快你 debug 越久，最后发现还是在给 AI 擦屁股",
 ]
 
-STYLES = ["humor", "pro", "sharp", "warm", "sharpw", "meme", "translate", "sarcasm"]
+STYLES = ["auto", "humor", "pro", "sharp", "warm", "sharpw", "meme", "translate", "sarcasm"]
 
 
 async def main():

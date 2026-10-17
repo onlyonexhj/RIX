@@ -171,11 +171,19 @@ async function callOpenAI(cfg, prompt, signal) {
   const base = normalizeBase(cfg);
   const url = /\/chat\/completions$/.test(base) ? base : base + '/chat/completions';
 
+  // 视觉：带图时 user 消息改为多模态部件数组（OpenAI 兼容格式）
+  const userContent =
+    prompt.images && prompt.images.length
+      ? [{ type: 'text', text: prompt.user }].concat(
+          prompt.images.map((u) => ({ type: 'image_url', image_url: { url: u } }))
+        )
+      : prompt.user;
+
   const body = {
     model: cfg.model,
     messages: [
       { role: 'system', content: prompt.system },
-      { role: 'user', content: prompt.user },
+      { role: 'user', content: userContent },
     ],
     temperature: typeof cfg.temperature === 'number' ? cfg.temperature : 1,
     max_tokens: Number(cfg.maxTokens) || 4000,
@@ -206,7 +214,7 @@ async function callOpenAI(cfg, prompt, signal) {
 
   const text = await res.text();
   if (!res.ok) {
-    throw new Error('HTTP ' + res.status + ' ' + (safeParse(text).error?.message || text.slice(0, 300)));
+    throw new Error('HTTP ' + res.status + ' ' + (safeParse(text).error?.message || text.slice(0, 300)) + visionHint(prompt));
   }
   const json = safeParse(text);
   if (!json) throw new Error('返回非 JSON：' + text.slice(0, 200));
@@ -227,6 +235,14 @@ async function callAnthropic(cfg, prompt, signal) {
   const base = normalizeBase(cfg);
   const url = /\/messages$/.test(base) ? base : base + '/messages';
 
+  // 视觉：带图时 user 内容改为块数组（Anthropic Messages 格式，URL source）
+  const userContentA =
+    prompt.images && prompt.images.length
+      ? [{ type: 'text', text: prompt.user }].concat(
+          prompt.images.map((u) => ({ type: 'image', source: { type: 'url', url: u } }))
+        )
+      : prompt.user;
+
   const res = await fetch(url, {
     method: 'POST',
     headers: {
@@ -237,7 +253,7 @@ async function callAnthropic(cfg, prompt, signal) {
     body: JSON.stringify({
       model: cfg.model,
       system: prompt.system,
-      messages: [{ role: 'user', content: prompt.user }],
+      messages: [{ role: 'user', content: userContentA }],
       max_tokens: Number(cfg.maxTokens) || 4000,
       temperature: typeof cfg.temperature === 'number' ? cfg.temperature : 1,
     }),
@@ -246,7 +262,7 @@ async function callAnthropic(cfg, prompt, signal) {
 
   const text = await res.text();
   if (!res.ok) {
-    throw new Error('HTTP ' + res.status + ' ' + (safeParse(text).error?.message || text.slice(0, 300)));
+    throw new Error('HTTP ' + res.status + ' ' + (safeParse(text).error?.message || text.slice(0, 300)) + visionHint(prompt));
   }
   const json = safeParse(text);
   if (!json) throw new Error('返回非 JSON：' + text.slice(0, 200));
@@ -259,6 +275,18 @@ function safeParse(s) {
   } catch (e) {
     return null;
   }
+}
+
+/** auto 风格的跳过语义：模型对不合适推文的候选输出 SKIP */
+function isSkipEntry(s) {
+  return /^\s*skip\s*$/i.test(String(s || ''));
+}
+
+/** 带图请求失败时，提示可能是不支持视觉（最常见的 400 原因） */
+function visionHint(prompt) {
+  return prompt && prompt.images && prompt.images.length
+    ? '（本次已附带推文图片；若当前模型不支持视觉，请在设置中关闭「识别推文图片」或改用视觉模型）'
+    : '';
 }
 
 /** 生成前把代理设置应用到浏览器（用户改过代理后立即生效，无需重启扩展） */
@@ -295,11 +323,19 @@ async function callOpenAIStream(cfg, prompt, signal, onDelta) {
   const base = normalizeBase(cfg);
   const url = /\/chat\/completions$/.test(base) ? base : base + '/chat/completions';
 
+  // 视觉：带图时 user 消息改为多模态部件数组（OpenAI 兼容格式）
+  const userContentS =
+    prompt.images && prompt.images.length
+      ? [{ type: 'text', text: prompt.user }].concat(
+          prompt.images.map((u) => ({ type: 'image_url', image_url: { url: u } }))
+        )
+      : prompt.user;
+
   const body = {
     model: cfg.model,
     messages: [
       { role: 'system', content: prompt.system },
-      { role: 'user', content: prompt.user },
+      { role: 'user', content: userContentS },
     ],
     temperature: typeof cfg.temperature === 'number' ? cfg.temperature : 1,
     max_tokens: Number(cfg.maxTokens) || 4000,
@@ -327,7 +363,7 @@ async function callOpenAIStream(cfg, prompt, signal, onDelta) {
 
   if (!res.ok) {
     const t = await res.text().catch(() => '');
-    throw new Error('HTTP ' + res.status + ' ' + (safeParse(t).error?.message || t.slice(0, 300)));
+    throw new Error('HTTP ' + res.status + ' ' + (safeParse(t).error?.message || t.slice(0, 300)) + visionHint(prompt));
   }
   if (!res.body) {
     // 极少数环境不支持流式读取 -> 退化为一次性读取
@@ -403,6 +439,14 @@ async function callAnthropicStream(cfg, prompt, signal, onDelta) {
   const base = normalizeBase(cfg);
   const url = /\/messages$/.test(base) ? base : base + '/messages';
 
+  // 视觉：带图时 user 内容改为块数组（Anthropic Messages 格式，URL source）
+  const userContentAS =
+    prompt.images && prompt.images.length
+      ? [{ type: 'text', text: prompt.user }].concat(
+          prompt.images.map((u) => ({ type: 'image', source: { type: 'url', url: u } }))
+        )
+      : prompt.user;
+
   const res = await fetch(url, {
     method: 'POST',
     headers: {
@@ -413,7 +457,7 @@ async function callAnthropicStream(cfg, prompt, signal, onDelta) {
     body: JSON.stringify({
       model: cfg.model,
       system: prompt.system,
-      messages: [{ role: 'user', content: prompt.user }],
+      messages: [{ role: 'user', content: userContentAS }],
       max_tokens: Number(cfg.maxTokens) || 4000,
       temperature: typeof cfg.temperature === 'number' ? cfg.temperature : 1,
       stream: true,
@@ -423,7 +467,7 @@ async function callAnthropicStream(cfg, prompt, signal, onDelta) {
 
   if (!res.ok) {
     const t = await res.text().catch(() => '');
-    throw new Error('HTTP ' + res.status + ' ' + (safeParse(t).error?.message || t.slice(0, 300)));
+    throw new Error('HTTP ' + res.status + ' ' + (safeParse(t).error?.message || t.slice(0, 300)) + visionHint(prompt));
   }
   if (!res.body) {
     const t = await res.text();
@@ -505,9 +549,14 @@ async function handleGenerate(payload) {
     await ensureProxy(cfg);
     const raw = await fn(cfg, prompt, controller.signal);
 
-    const list = U.parseReplyList(raw, prompt.n);
-    if (!list.length) {
+    const parsed = U.parseReplyList(raw, prompt.n);
+    if (!parsed.length) {
       throw new Error('未能从模型输出中解析出回复内容。原始输出：' + String(raw).slice(0, 200));
+    }
+    // auto 风格：过滤模型按规则输出的 SKIP 条目，全 SKIP 时给出明确提示
+    const list = parsed.filter((x) => !isSkipEntry(x));
+    if (!list.length) {
+      throw new Error('这条推文按「自动」风格规则被跳过了（内容模糊或立场不符），换个风格试试。');
     }
 
     return {
@@ -576,9 +625,14 @@ async function handleGenerateStream(port, payload) {
     await ensureProxy(cfg);
     const raw = await fnStream(cfg, prompt, controller.signal, onDelta);
 
-    const list = U.parseReplyList(raw, prompt.n);
-    if (!list.length) {
+    const parsed = U.parseReplyList(raw, prompt.n);
+    if (!parsed.length) {
       throw new Error('未能从模型输出中解析出回复内容。原始输出：' + String(raw).slice(0, 200));
+    }
+    // auto 风格：过滤模型按规则输出的 SKIP 条目，全 SKIP 时给出明确提示
+    const list = parsed.filter((x) => !isSkipEntry(x));
+    if (!list.length) {
+      throw new Error('这条推文按「自动」风格规则被跳过了（内容模糊或立场不符），换个风格试试。');
     }
 
     send({

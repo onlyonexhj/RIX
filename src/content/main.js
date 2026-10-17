@@ -65,8 +65,10 @@
       if (!cfg.enabled) return;
       const composer = D.findComposer();
 
-      if (!composer) {
-        // 弹层关闭
+      // 只跟真实弹层（role=dialog）走：时间线顶部的内联编辑器不算。
+      // 否则发完评论回到列表页，弹层关闭 -> 内联编辑器被当成「新弹层」，
+      // 会误开面板并自动生成（2026-10-17 用户实测踩中）
+      if (!composer || !composer.dialog) {
         if (lastComposer) {
           lastComposer = null;
           if (P.isOpen()) P.close();
@@ -90,7 +92,7 @@
             // 兜底：用点击回复按钮时抓到的那条
             tweet = lastTweet;
           }
-          P.open(fresh);
+          P.open(fresh, tweet).then(() => P.autoGenerate());
         }, 260);
       }
     }, 400);
@@ -191,13 +193,17 @@
     }
     // 先尝试真实弹层（点回复后才有编辑器）
     const c = D.findComposer();
-    if (c) return P.open(c);
+    if (c) {
+      await P.open(c, tweet);
+      P.autoGenerate();
+      return;
+    }
 
     // 无弹层：仍打开面板，但标记为"待填入"模式，
     // 用户点回复气泡后会自动用上次的生成结果
-    P.open(null);
+    P.open(null, tweet);
     P.setPendingTweet(tweet);
-    U.toast('已获取推文内容，点「生成回复」', 'ok');
+    P.autoGenerate();
   }
 
   /* ------------------------------------------------------------------ */

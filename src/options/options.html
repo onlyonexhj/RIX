@@ -83,6 +83,13 @@
           </label>
         </div>
 
+        <div class="row row--inline">
+          <label class="cb">
+            <input type="checkbox" id="vision" />
+            <span>识别推文图片（把图片发给模型看；需模型支持视觉，如 GLM-4V / GPT-4o / Claude）</span>
+          </label>
+        </div>
+
         <div class="act">
           <button class="btn btn--pri" id="test" type="button">测试连接</button>
           <span class="test-out" id="testOut"></span>
@@ -279,6 +286,7 @@
       <!-- ========== 行为 ========== -->
       <section class="card">
         <h2 class="card__t">5 · 交互行为</h2>
+        <label class="cb"><input type="checkbox" id="autoGenerate" /><span>打开回复面板时自动生成回复（点「回复」气泡或悬浮 ✦ 按钮后立即请求 AI，取消则手动点「生成回复」）</span></label>
         <label class="cb"><input type="checkbox" id="showFloatingButton" /><span>时间线上显示「✦ AI 回复」悬浮按钮</span></label>
         <label class="cb"><input type="checkbox" id="autoInsertFirst" /><span>生成完成后自动回填第 1 条</span></label>
         <label class="cb"><input type="checkbox" id="debug" /><span>开启调试日志（Console）</span></label>

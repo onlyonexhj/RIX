@@ -29,6 +29,7 @@
     elapsed: 0,
     composer: null,
     pinned: false, // 用户是否手动拖过面板（拖过就不再自动定位）
+    lastGenKey: null, // 最近一次自动生成对应的推文键（防同一条重复自动请求）
     // 流式
     port: null,
     streamText: '',
@@ -93,6 +94,10 @@
 .xai-sel:focus{border-color:#1d9bf0}
 
 .xai-act{padding:10px 12px;display:flex;gap:8px;align-items:center;flex:none}
+.xai-auto{display:flex;align-items:center;gap:5px;font-size:12px;color:#8b98a5;
+  cursor:pointer;flex:none;user-select:none;-webkit-user-select:none}
+.xai-auto:hover{color:#e7e9ea}
+.xai-auto__cb{accent-color:#1d9bf0;cursor:pointer;margin:0;flex:none}
 .xai-btn{flex:1;padding:9px 12px;border-radius:999px;border:0;cursor:pointer;font-size:13.5px;font-weight:700;
   display:flex;align-items:center;justify-content:center;gap:7px;transition:.14s;white-space:nowrap}
 .xai-btn--go{background:#1d9bf0;color:#fff}
@@ -188,6 +193,9 @@
       </div>
 
       <div class="xai-act">
+        <label class="xai-auto" title="勾选：打开面板即自动生成回复；不勾选：手动点「生成回复」">
+          <input type="checkbox" class="xai-auto__cb" />自动生成
+        </label>
         <button class="xai-btn xai-btn--go">✦ 生成回复</button>
         <button class="xai-btn xai-btn--stop" style="display:none">中止</button>
       </div>
@@ -206,6 +214,7 @@
       countWrap: host.querySelector('[data-k="count"] .xai-grp__bs'),
       lang: host.querySelector('[data-k="lang"]'),
       go: host.querySelector('.xai-btn--go'),
+      autoCb: host.querySelector('.xai-auto__cb'),
       stop: host.querySelector('.xai-btn--stop'),
       bar: host.querySelector('.xai-bar'),
       barIn: host.querySelector('.xai-bar__i'),
@@ -247,6 +256,12 @@
     });
 
     els.lang.addEventListener('change', () => XAI.setConfig({ lang: els.lang.value }));
+
+    // 「自动生成」复选框：与设置页「交互行为」里的开关是同一个配置项
+    els.autoCb.addEventListener('change', () => {
+      cfg.autoGenerate = els.autoCb.checked;
+      XAI.setConfig({ autoGenerate: els.autoCb.checked });
+    });
 
     els.go.addEventListener('click', () => {
       if (state.loading) P.cancel();
@@ -391,13 +406,14 @@
    * 打开 / 关闭 / 定位
    * ------------------------------------------------------------------ */
 
-  P.open = async function open(composer) {
+  P.open = async function open(composer, tweetHint) {
     build();
     cfg = await XAI.getConfig();
 
     markOn(els.styleWrap, els.styleWrap.querySelector(`[data-v="${cfg.style}"]`));
     markOn(els.countWrap, els.countWrap.querySelector(`[data-v="${cfg.count}"]`));
     els.lang.value = cfg.lang;
+    els.autoCb.checked = cfg.autoGenerate !== false;
 
     // 重新探测弹层（打开面板期间 X 可能重渲染）
     state.composer = composer || D.findComposer();
@@ -406,6 +422,9 @@
     if (state.composer) {
       const tweet = D.extractTargetTweet(state.composer);
       if (tweet) state.tweet = tweet;
+      else if (tweetHint) state.tweet = tweetHint; // 弹层内提取失败时用点击时缓存的推文
+    } else if (tweetHint) {
+      state.tweet = tweetHint;
     }
     refreshSrc();
 
@@ -432,6 +451,8 @@
     state.open = false;
     // 关闭后解除位置锁定：下次打开（新的发帖弹层）重新自动跟随
     state.pinned = false;
+    // 清幂等键：下次再打开（哪怕同一条推文）允许重新自动生成
+    state.lastGenKey = null;
     // 断开流式连接，让 SW 立刻中止请求，不白烧 token
     if (state.loading) {
       cleanupPort();
@@ -568,6 +589,7 @@
       return;
     }
 
+    state.lastGenKey = tweetKey(state.tweet);
 setLoading(true);
     state.taskId = U.uid();
     startTimer();
@@ -696,6 +718,26 @@ setLoading(true);
     U.toast(msg, 'err', 5000);
     schedulePosition();
   }
+
+  /** 生成请求的幂等键：同一条推文不重复自动生成 */
+  function tweetKey(t) {
+    if (!t) return '';
+    return t.url || (t.handle || t.author || '') + '|' + String(t.text || '').slice(0, 80);
+  }
+
+  /**
+   * 自动生成入口（main.js 在面板打开后调用）。
+   * 规则：正在生成就不打断；同一条推文已自动生成过就不再重复
+   * （悬浮按钮先生成 -> 用户再点回复气泡打开弹层，不会发起第二次请求）。
+   */
+  P.autoGenerate = function autoGenerate() {
+    if (cfg.autoGenerate === false) return; // 设置页「交互行为」可关
+    if (state.loading) return;
+    if (!state.tweet) return;
+    const key = tweetKey(state.tweet);
+    if (key && key === state.lastGenKey) return;
+    P.generate();
+  };
 
   P.cancel = function cancel() {
     if (!state.loading || !state.taskId) return;

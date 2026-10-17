@@ -10,8 +10,8 @@
 
   const FIELDS = [
     'enabled', 'provider', 'baseUrl', 'apiKey', 'model', 'maxTokens', 'timeoutSec',
-    'disableThinking', 'style', 'count', 'lang', 'length', 'customInstruction',
-    'showFloatingButton', 'autoInsertFirst', 'debug',
+    'disableThinking', 'vision', 'style', 'count', 'lang', 'length', 'customInstruction',
+    'showFloatingButton', 'autoGenerate', 'autoInsertFirst', 'debug',
     // 提示词配置
     'promptFormat', 'persona', 'systemPrompt', 'userPrompt',
     // 网络 / 代理

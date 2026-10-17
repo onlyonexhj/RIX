@@ -1,0 +1,4 @@
+
+DevTools listening on ws://127.0.0.1:9224/devtools/browser/a50c3a57-caba-4a75-adc9-3ffa9397557d
+[33060:32576:1017/114809.560:ERROR:extensions\browser\content_verifier\content_verify_job.cc:493] Content verify job failed for extension: fignfifoniblkonapihmkfakmlgkbkcf at path: src/options/options.html and for reason:1
+[33060:32576:1017/114809.569:ERROR:extensions\browser\content_verifier\content_verify_job.cc:493] Content verify job failed for extension: fignfifoniblkonapihmkfakmlgkbkcf at path: src/background/service-worker.js and for reason:1

@@ -251,6 +251,32 @@
     if (hasMedia('[data-testid="videoPlayer"]')) media.push('video');
     if (hasMedia('[data-testid="card.wrapper"]')) media.push('link');
 
+    // 图片 URL：只取推文媒体图（pbs.twimg.com/media/），头像(profile_images)天然被排除；
+    // 再排除用户自己草稿里的图（contenteditable / 附件区），避免把回复者附图当原推图
+    const images = [];
+    const seenImg = {};
+    const IMG_SEL = 'img[src*="pbs.twimg.com/media/"]';
+    const collectImgs = (scope) => {
+      if (!scope || scope.nodeType !== 1) return;
+      let els = [];
+      try {
+        if (safeMatch(scope, IMG_SEL)) els.push(scope);
+        els = els.concat(Array.prototype.slice.call(scope.querySelectorAll(IMG_SEL)));
+      } catch (e) {
+        return;
+      }
+      for (const im of els) {
+        if (im.closest && im.closest('[contenteditable="true"], [data-testid="attachments"]')) continue;
+        const src = im.getAttribute('src') || '';
+        const key = src.split('?')[0];
+        if (!src || seenImg[key]) continue;
+        seenImg[key] = 1;
+        images.push(src);
+      }
+    };
+    collectImgs(cardEl);
+    if (rootEl !== cardEl) collectImgs(rootEl);
+
     if (!text && media.length === 0 && !handle) return null;
 
     return {
@@ -260,6 +286,7 @@
       url: url,
       time: time,
       media: media,
+      images: images,
       truncated: /Show more|显示更多|查看更多/.test(cardEl.innerText || ''),
     };
   };

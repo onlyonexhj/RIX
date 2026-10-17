@@ -125,6 +125,7 @@ eq('65 秒', U.fmtDuration(65), '1:05');
 console.log('\n【6】默认配置自检');
 eq('maxTokens >= 2000（防推理 token 陷阱）', cfg.maxTokens >= 2000, true);
 eq('默认语言跟随原文', cfg.lang, 'auto');
+eq('默认风格为自动', cfg.style, 'auto');
 eq('默认条数 3', cfg.count, 3);
 
 console.log('\n【7】escapeHtml — XSS 防护');
@@ -159,8 +160,8 @@ const tweet = {
   time: '2026-10-16T10:00:00.000Z', media: ['image'], url: '',
 };
 
-// 10a 默认模板
-let p = XAI.buildPrompt(tweet, cfg, {});
+// 10a 默认模板（默认风格已是 auto，走专属模板；这里显式指定 humor 测经典默认模板）
+let p = XAI.buildPrompt(tweet, Object.assign({}, cfg, { style: 'humor' }), {});
 eq('默认：条数正确', p.n, 3);
 eq('默认：JSON 约束存在', p.system.includes('JSON'), true);
 eq('默认：推文正文进 user', p.user.includes('今天学会了用 AI 写代码'), true);
@@ -168,8 +169,28 @@ eq('默认：handle 进 user', p.user.includes('@penguin_dance'), true);
 eq('默认：中文原文->中文输出', p.system.includes('简体中文'), true);
 eq('默认：无残留 {{}}', /\{\{/.test(p.system + p.user), false);
 
+// 10a-2 视觉：推文图片随提示词走（SW 拼多模态消息用）
+{
+  const imgTweet = Object.assign({}, tweet, {
+    images: ['https://pbs.twimg.com/media/a1?format=jpg', 'https://pbs.twimg.com/media/b2?format=jpg'],
+  });
+  p = XAI.buildPrompt(imgTweet, Object.assign({}, cfg, { vision: true }), {});
+  eq('视觉：开启时返回图片', p.images.length, 2);
+  eq('视觉：user 含附图说明', p.user.includes('【附图】'), true);
+  p = XAI.buildPrompt(imgTweet, cfg, {});
+  eq('视觉：默认关闭不带图', (p.images || []).length, 0);
+  eq('视觉：关闭时无附图说明', p.user.includes('【附图】'), false);
+  p = XAI.buildPrompt(Object.assign({}, tweet, { images: ['1', '2', '3', '4', '5', '6'] }),
+    Object.assign({}, cfg, { vision: true }), {});
+  eq('视觉：图片最多 4 张', p.images.length, 4);
+  p = XAI.buildPrompt(Object.assign({}, tweet, { images: ['x'] }),
+    Object.assign({}, cfg, { vision: true, systemPrompt: '共 {{imageCount}} 张图' }), {});
+  eq('视觉：imageCount 变量渲染', p.system, '共 1 张图');
+}
+
 // 10b 自定义 system 模板
 p = XAI.buildPrompt(tweet, Object.assign({}, cfg, {
+  style: 'humor',
   systemPrompt: '你是{{styleName}}风格助手。写 {{count}} 条。语言：{{lang}}',
 }), {});
 eq('自定义 system：风格名变量', p.system.includes('你是幽默风格助手'), true);

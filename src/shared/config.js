@@ -28,6 +28,11 @@
     disableThinking: true,
     timeoutSec: 90,
 
+    // —— 图片识别 ——
+    // 把推文图片一并发给模型（需模型支持视觉：GLM-4V / GPT-4o / Claude 等）。
+    // 默认关：多数纯文本模型（glm-4.6 / deepseek-chat）不支持图片，开了会 400
+    vision: false,
+
     // —— 流式输出 ——
     // ★ 网络慢（尤其挂 VPN）时开流式，感知延迟从「等全部生成完」
     //   降到「第一个字约 1 秒可见」。强烈建议保持开启。
@@ -43,8 +48,11 @@
     proxyScheme: 'http', // http | socks4 | socks5
 
     // —— 交互默认值 ——
+    // 打开回复面板时自动请求 AI（点「回复」气泡 / 悬浮 ✦ 按钮后立即生成）。
+    // 关掉则保持老流程：面板打开后手动点「生成回复」
+    autoGenerate: true,
     count: 3,
-    style: 'humor',
+    style: 'auto',
     lang: 'auto', // auto | zh | en | ja | ko
     length: 'medium', // short | medium | long
     customInstruction: '',
@@ -78,7 +86,10 @@
     { key: 'tweet.time', label: '发布时间', desc: 'ISO 格式时间' },
     { key: 'tweet.media', label: '媒体类型', desc: '如「图片、视频」，无则空' },
     { key: 'tweet.url', label: '推文链接', desc: '完整 URL' },
+    { key: 'now', label: '当前时间', desc: '生成时刻，如「2026-10-17 14:30」' },
+    { key: 'tweet.text400', label: '推文前 400 字', desc: '正文截断到 400 字（auto 风格用）' },
     { key: 'count', label: '生成条数', desc: '本次要生成几条' },
+    { key: 'imageCount', label: '附图数量', desc: '本次随消息发给模型的图片张数' },
     { key: 'style', label: '风格描述', desc: '当前风格的中文说明' },
     { key: 'styleName', label: '风格名', desc: '如「幽默」' },
     { key: 'length', label: '长度描述', desc: '如「1-2 句，30-80 字」' },
@@ -180,6 +191,7 @@
 
   /** 回复风格 */
   XAI.styles = [
+    { id: 'auto', label: '自动', desc: '按推文自动选口吻与语言，不合适就跳过' },
     { id: 'humor', label: '幽默', desc: '轻松调侃，接梗，适度玩梗' },
     { id: 'pro', label: '专业', desc: '有数据、有观点，干货感强' },
     { id: 'sharp', label: '犀利', desc: '观点鲜明，有锋芒敢反驳' },

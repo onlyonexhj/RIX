@@ -33,6 +33,59 @@
 
   const LANG_NAME = { zh: '简体中文', en: 'English', ja: '日本語', ko: '한국어' };
 
+  /* ------------------------------------------------------------------
+   * auto 风格（按推文自动选口吻/语言，不合适就 SKIP）
+   * 语言指令按「原推语种」在构建时算好注入，不让模型自己猜。
+   * ------------------------------------------------------------------ */
+  const AUTO_LANG_RULE = {
+    ja: '【言語】日本語で返信してください【長さ】15〜50文字、完整句子自然表达',
+    zh: '【语言】必须用中文回复【长度】15-50字，不要压缩成口号，用完整的口语化句子',
+    // en / ko / unknown 一律按「其他」走英文
+    other: '【Language】Must reply in English【Length】15-50 chars, natural complete sentences',
+  };
+
+  const AUTO_SYSTEM_TEMPLATE = [
+    '{{langRule}}',
+    '',
+    '【风格判断】',
+    '- 技术/行业/金融/编程类 → 用行业老手口吻，专业但不装',
+    '- 生活/日常/娱乐/搞笑类 → 用朋友聊天口吻，轻松随意',
+    '- 观点/时事/社会类 → 认同的可以表达自己的态度，不赞同的直接SKIP，不唱反调',
+    '',
+    '【铁律】',
+    '1. 【最重要】评论必须跟原推文的情境完全一致——先理解推文在说什么具体的事（项目名、事件、人物、数据），评论必须直接回应这个具体情境',
+    '2. 【禁止过度压缩】不要为了短而牺牲自然——可以说完整的话、用自然的语气。不要像写对联一样「前半句铺垫+后半句升华」，那种对仗句子一看就是AI写的。错误示例：「市场沉浮考验人性，拿得住才是真功夫」。正确示例：「以太坊最近我也没看懂，基金会最近操作确实迷」',
+    '3. 【口语化】必须像朋友吃饭聊天一样自然——直接说，不要加「说实话」「老实说」「说句实话」「讲真」这类废话前缀。就像你跟哥们聊天不会每句话都先说「说实话」。用「我也觉得」「确实」「真的」这类词没问题。🚨 严禁使用：「属实」「这波」「说实话」「老实说」「说句实话」「讲真」',
+    '4. 禁止AI味：不说「分析得很到位」「值得关注」「这个观点很有意思」「高瞻远瞩」「布局未来」',
+    '5. 禁止空洞附和、鸡汤、emoji开头',
+    '6. 禁止万能评论——如果评论换个推文也能用，说明不够具体',
+    '7. 【关键】禁止说教式金句：不要用一句话总结人生道理/行业规律/普世智慧。比如"各国困境不同，对症下药才关键，别迷信单一理论""每个时代都有它的阵痛期"这类放哪都对的废话——具体到这条推文在说什么事，就事论事',
+    '8. 【跳过规则】如果推文内容模糊、缺乏上下文，你不知道它具体在说什么（比如没头没尾的一句话、缺少背景的感叹、不明所指的吐槽），直接回复SKIP，不要硬编评论',
+    '9. 【立场】只评论你认同或觉得有意思的推文，不发表反对、反驳、唱反调的评论。如果你不赞同原推文的观点，直接回复SKIP跳过，不要争论、不要抬杠、不要「但我觉得」式转折',
+    '',
+    '只输出评论内容，不要其他任何文字。需要跳过时，只输出三个字母SKIP，禁止附带任何理由、分析或解释。',
+    '',
+    '{{customInstruction}}',
+    '{{outputFormat}}',
+  ].join('\n');
+
+  const AUTO_USER_TEMPLATE = [
+    '你正在Twitter上评论别人的推文。',
+    '现在时间：{{now}}',
+    '原推文作者：@{{tweet.handle}}',
+    '原推文内容：{{tweet.text400}}',
+  ].join('\n');
+
+  /** 当前本地时间，如「2026-10-17 14:30」 */
+  function nowText() {
+    const d = new Date();
+    const p = (x) => String(x).padStart(2, '0');
+    return (
+      d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) +
+      ' ' + p(d.getHours()) + ':' + p(d.getMinutes())
+    );
+  }
+
   /**
    * 模板变量插值。
    *
@@ -79,7 +132,7 @@
    * @param {object} tweet  被回复的推文
    * @param {object} cfg    用户配置
    * @param {object} extra  本次调用的临时参数（面板里选的风格/条数等）
-   * @returns {{system:string, user:string, n:number}}
+   * @returns {{system:string, user:string, n:number, images:string[]}}
    */
   function buildPrompt(tweet, cfg, extra) {
     extra = extra || {};
@@ -110,9 +163,19 @@
       .join('；')
       .trim();
 
+    // auto 风格：语言指令按「原推语种」在本地算好注入，不让模型自己猜
+    const isAuto = !!(styleDef && styleDef.id === 'auto');
+    const langRule = isAuto ? (AUTO_LANG_RULE[srcLang] || AUTO_LANG_RULE.other) : '';
+
+    // 视觉：开关打开且推文带图时，把图片 URL 交给 SW 拼多模态消息（最多 4 张控成本）
+    const images = cfg.vision && Array.isArray(tweet.images)
+      ? tweet.images.filter(Boolean).slice(0, 4)
+      : [];
+
     const vars = {
       tweet: {
         text: tweet.text || '（该推文只有媒体，没有文字）',
+        text400: String(tweet.text || '（该推文只有媒体，没有文字）').slice(0, 400),
         author: tweet.author || '未知',
         handle: tweet.handle || '',
         time: tweet.time || '未知',
@@ -120,38 +183,63 @@
         url: tweet.url || '',
       },
       count: n,
+      imageCount: images.length,
       style: styleText(styleDef),
       styleName: styleDef ? styleDef.label : '',
       length: lengthText(lenDef),
       lang: LANG_NAME[wantLang] || '跟随原文语言',
       customInstruction: extraReq,
+      now: nowText(),
+      langRule: langRule,
+      // auto 模板的输出格式段：json 模式强制 JSON 数组（SKIP 条目写 "SKIP"），
+      // plain 模式改序号行。count 直接拼进字符串（renderTemplate 不做嵌套展开）
+      outputFormat: isAuto
+        ? cfg.promptFormat === 'plain'
+          ? '本次需要生成 ' + n + ' 条不同的候选。直接给出 ' + n + ' 条回复，每条一行，' +
+            '以「1. 」「2. 」这样的序号开头，不要 JSON、不要代码块。' +
+            '需要跳过的条目只写 SKIP。各条切入角度、句式要有明显差异。'
+          : '本次需要生成 ' + n + ' 条不同的候选。只输出一个 JSON 字符串数组，' +
+            '例如 ["第一条","第二条"]。不要 markdown 代码块，不要任何解释文字。' +
+            '需要跳过的条目在数组中写 "SKIP"。各条切入角度、句式要有明显差异。'
+        : '',
     };
 
-    // 用户自定义模板优先；留空则用内置默认
-    const sysTpl = String(cfg.systemPrompt || '').trim() || XAI.defaultSystemTemplate;
-    const userTpl = String(cfg.userPrompt || '').trim() || XAI.defaultUserTemplate;
+    // 用户自定义模板优先；留空则用内置默认（auto 风格有专属默认模板）
+    const sysTpl = String(cfg.systemPrompt || '').trim()
+      || (isAuto ? AUTO_SYSTEM_TEMPLATE : XAI.defaultSystemTemplate);
+    const userTpl = String(cfg.userPrompt || '').trim()
+      || (isAuto ? AUTO_USER_TEMPLATE : XAI.defaultUserTemplate);
 
     let sys = renderTemplate(sysTpl, vars);
     let user = renderTemplate(userTpl, vars);
+
+    // 附图说明（图片本体由 SW 以多模态消息部件附带，提示词里只交代任务）
+    if (images.length) {
+      user += '\n\n【附图】这条推文带有 ' + images.length + ' 张图片（已随本消息一并发给你）。' +
+        '可结合图片内容回应，但不要逐条复述图片细节。';
+    }
 
     // 人设前置
     const persona = String(cfg.persona || '').trim();
     if (persona) sys = persona + '\n\n' + sys;
 
     // plain 模式：放宽 JSON 硬约束，改为序号列表输出
+    // （auto 模板的 {{outputFormat}} 已按 promptFormat 生成对应格式段，格式段跳过避免重复）
     if (cfg.promptFormat === 'plain') {
-      sys +=
-        '\n\n输出格式：直接给出 ' +
-        n +
-        ' 条回复，每条一行，以「1. 」「2. 」这样的序号开头，不要 JSON、不要代码块。';
+      if (!isAuto) {
+        sys +=
+          '\n\n输出格式：直接给出 ' +
+          n +
+          ' 条回复，每条一行，以「1. 」「2. 」这样的序号开头，不要 JSON、不要代码块。';
+      }
 
-      // 默认模板已含 {{tweet.media}}；若用户自定义模板没写媒体变量，plain 模式下补一条
+      // 默认/auto 模板的 user 段都不含 {{tweet.media}}；plain 模式下补一条媒体说明
       if (!/\{\{\s*tweet\.media\s*\}\}/.test(userTpl) && vars.tweet.media) {
         user += '\n（该推文附带媒体：' + vars.tweet.media + '）';
       }
     }
 
-    return { system: sys, user: user, n: n };
+    return { system: sys, user: user, n: n, images: images };
   }
   XAI.buildPrompt = buildPrompt;
 })(typeof window !== 'undefined' ? window : self);

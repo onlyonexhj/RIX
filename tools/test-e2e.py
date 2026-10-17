@@ -40,6 +40,9 @@ body{background:#000;color:#e7e9ea;font-family:system-ui;margin:0;padding:30px}
   <div data-testid="User-Name">会跳舞的企鹅 <span>@penguin_dance</span></div>
   <time datetime="2026-10-16T10:00:00.000Z">1小时</time>
   <div data-testid="tweetText">时间线上的正文</div>
+  <div data-testid="tweetPhoto">
+    <img src="https://pbs.twimg.com/media/GabcDEF?format=jpg&name=medium" alt="">
+  </div>
 </div>
 
 <!-- 回复弹层（结构对齐真实 X：role=dialog + Draft contenteditable） -->
@@ -148,6 +151,28 @@ CASES = [
                      document.getElementById('mediaTweet'));
                    return t ? { media: t.media, handle: t.handle } : null; }""",
         lambda v: bool(v) and "image" in v["media"] and v["handle"] == "@cat_shot",
+    ),
+    (
+        "提取推文媒体图 URL",
+        """() => (XAI.detector.parseTweetCard(
+                    document.getElementById('timelineTweet'))||{}).images""",
+        lambda v: isinstance(v, list) and len(v) == 1
+        and "pbs.twimg.com/media/" in v[0],
+    ),
+    (
+        "头像不在媒体图之列（profile_images 被排除）",
+        """() => { const d = document.createElement('div');
+                   d.setAttribute('data-testid', 'tweet');
+                   d.innerHTML = '<div data-testid="User-Name">某人 <span>@somebody</span></div>'
+                               + '<img src="https://pbs.twimg.com/profile_images/911/avatar.jpg">'
+                               + '<img src="https://pbs.twimg.com/media/only1?format=jpg">';
+                   document.body.appendChild(d);
+                   const r = XAI.detector.parseTweetCard(d) || {};
+                   const n = (r.images || []).length;
+                   const only = (r.images || [])[0] || '';
+                   d.remove();
+                   return { n: n, only: only }; }""",
+        lambda v: v["n"] == 1 and "media/only1" in v["only"],
     ),
 ]
 
@@ -326,7 +351,7 @@ async def main():
                           "内容长度=%d" % len(st.strip()))
                     nopt = await pg.evaluate(
                         "() => document.getElementById('style').options.length")
-                    check("popup 风格下拉已填充", nopt == 8, "options=%s" % nopt)
+                    check("popup 风格下拉已填充", nopt == 9, "options=%s" % nopt)
                 else:
                     chips = await pg.evaluate(
                         "() => document.querySelectorAll('.vchip').length")
