@@ -264,6 +264,9 @@ python tools/test-e2e.py
 # 拦截所有外部 HTTP 请求，不调用真实模型
 python tools/test-extension-regressions.py
 
+# 翻译插件追加译文后的回复对象匹配，以及切换对象时的回填拦截
+python tools/test-reply-target-regressions.py
+
 # 静态检测（防「静默失效」类 bug，建议提交前跑）
 node tools/check-comments.js   # 注释吞代码（node --check 查不出）
 node tools/check-pages.js      # 扩展页面脚本漏加载
@@ -297,6 +300,9 @@ A：① 确认扩展图标不是灰的（popup 里开关是否打开）；② �
 
 **Q：控制台报 `Xxx is not a function`？**
 A：八成是扩展没刷新，浏览器还在跑缓存的旧脚本。去 `chrome://extensions/` 点扩展卡片上的刷新按钮，再刷新 X 页面。
+
+**Q：回复弹层已打开，为什么还提示「请先打开这条推文的回复弹层」？**
+A：旧版在弹层没有推文链接时会重新比较完整正文，翻译插件追加译文后可能误判为其他推文。当前版本会优先读取原推文 ID；没有 ID 时，原文节点及其原文字内容保持不变也能继续回填。原文被替换或回复对象改变时仍会拦截。更新代码后请先刷新扩展，再刷新 X 页面。
 
 **Q：提示「找不到发帖弹层」？**
 A：X 改版时选择器可能失效。打开设置 →「开启调试日志」，Console 里会打印探测结果；把新的 `data-testid` 补进 `src/content/detector.js` 的 `D.SEL` 即可。选择器都做了「多候选 + 容错」，通常不用改。

@@ -180,11 +180,8 @@
    * 2. 提取被回复的推文
    * ------------------------------------------------------------------ */
 
-  /**
-   * 从弹层中提取「被回复的推文」信息。
-   * 返回 { author, handle, text, url, time, media } 或 null。
-   */
-  D.extractTargetTweet = function extractTargetTweet(composer) {
+  /** 找到编辑器之前的原推卡片，跳过草稿与编辑器下方的引用预览。 */
+  function findTargetCard(composer) {
     const dialog = composer && composer.dialog;
     const editor = composer && composer.editor;
     if (!dialog || !editor) return null;
@@ -214,7 +211,57 @@
     }
     if (!card) return null;
 
-    return D.parseTweetCard(card, dialog);
+    return card;
+  }
+
+  /** 从弹层提取回复对象；返回 { author, handle, text, url, time, media } 或 null。 */
+  D.extractTargetTweet = function extractTargetTweet(composer) {
+    const card = findTargetCard(composer);
+    return card ? D.parseTweetCard(card, composer.dialog) : null;
+  };
+
+  /**
+   * 无 status 链接时，记住本次弹层实际读取的原文节点。
+   * 翻译工具可能在生成期间追加译文；不能因此把同一条原推误判为另一条。
+   * 只允许原节点及全部原文字节点保持不变，不能凭正文前缀放宽匹配。
+   */
+  D.captureTargetSnapshot = function captureTargetSnapshot(composer) {
+    const card = findTargetCard(composer);
+    const source = card && pick(card, ['[data-testid="tweetText"]'], true);
+    if (!source || !source.ownerDocument.createTreeWalker) return null;
+    const walker = source.ownerDocument.createTreeWalker(source, 4); // SHOW_TEXT
+    const textNodes = [];
+    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+      if (U.cleanText(node.nodeValue)) textNodes.push({ node, value: node.nodeValue });
+    }
+    if (!textNodes.length) return null;
+    return { dialog: composer.dialog, source, textNodes, tweet: D.parseTweetCard(card, composer.dialog) };
+  };
+
+  D.matchesTargetSnapshot = function matchesTargetSnapshot(composer, snapshot, expected, extracted) {
+    if (!snapshot || composer.dialog !== snapshot.dialog || !U.sameTweet(snapshot.tweet, expected)) return false;
+    const card = findTargetCard(composer);
+    const source = card && pick(card, ['[data-testid="tweetText"]'], true);
+    if (source !== snapshot.source || !extracted) return false;
+
+    // 身份证据优先于 DOM 连续性，复用弹层/原文节点也不能越过 ID 或作者冲突。
+    const status = (tweet) => String(tweet.url || '').match(/\/status\/(\d+)/);
+    const currentId = status(extracted);
+    for (const previous of [snapshot.tweet, expected]) {
+      const previousId = status(previous);
+      if (currentId && previousId && currentId[1] !== previousId[1]) return false;
+      if (previous.handle && extracted.handle && previous.handle.toLowerCase() !== extracted.handle.toLowerCase()) return false;
+      if ((!previous.handle || !extracted.handle) && previous.author && extracted.author &&
+          previous.author !== '未知作者' && extracted.author !== '未知作者' &&
+          previous.author.toLowerCase() !== extracted.author.toLowerCase()) return false;
+    }
+    let previousNode = null;
+    for (const entry of snapshot.textNodes) {
+      if (!source.contains(entry.node) || entry.node.nodeValue !== entry.value) return false;
+      if (previousNode && !(previousNode.compareDocumentPosition(entry.node) & 4)) return false;
+      previousNode = entry.node;
+    }
+    return true;
   };
 
   /**
@@ -223,6 +270,25 @@
    */
   D.parseTweetCard = function parseTweetCard(cardEl, scope) {
     const rootEl = scope && scope.contains(cardEl) ? scope : cardEl;
+    const editor = safeMatch(rootEl, '[role="dialog"]') && pick(rootEl, D.SEL.editor, false);
+    const isOwnMetadata = (node) => {
+      if (node.closest('[contenteditable="true"], [data-testid="attachments"]')) return false;
+      const quoted = node.closest('[data-testid="quoteTweet"]');
+      if (quoted && quoted !== cardEl && !quoted.contains(cardEl)) return false;
+      const holder = node.closest('[data-testid="tweet"]');
+      if (holder && holder !== cardEl && !holder.contains(cardEl)) return false;
+      return !editor || !!(node.compareDocumentPosition(editor) & 4);
+    };
+    const pickMetadata = (container, selectors, needText) => {
+      for (const selector of selectors) {
+        const nodes = Array.prototype.slice.call(container.querySelectorAll(selector));
+        if (safeMatch(container, selector)) nodes.unshift(container);
+        for (const node of nodes) {
+          if (isOwnMetadata(node) && (!needText || U.cleanText(node.innerText || node.textContent))) return node;
+        }
+      }
+      return null;
+    };
 
     const textEl = pick(cardEl, D.SEL.tweetText, true);
     const text = textEl ? U.cleanText(textEl.innerText) : '';
@@ -230,7 +296,7 @@
     // 用户名：优先卡片内，退到 scope（弹层顶部）
     let handle = '';
     let displayName = '';
-    const nameEl = pick(cardEl, D.SEL.userName, true) || pick(rootEl, D.SEL.userName, true);
+    const nameEl = pickMetadata(cardEl, D.SEL.userName, true) || pickMetadata(rootEl, D.SEL.userName, true);
     if (nameEl) {
       const raw = U.cleanText(nameEl.innerText);
       const m = raw.match(/@([A-Za-z0-9_]{1,15})/);
@@ -244,12 +310,26 @@
     // （弹层结构里 <time> 常与 tweetText 平级，不在卡片内部）
     let url = '';
     let time = '';
-    const timeEl = pick(cardEl, ['time'], true) || pick(rootEl, ['time'], true);
+    const timeEl = pickMetadata(cardEl, ['time'], false) || pickMetadata(rootEl, ['time'], false);
     if (timeEl) {
       time = timeEl.getAttribute('datetime') || U.cleanText(timeEl.innerText);
       const a = timeEl.closest('a');
       if (a && a.href) url = a.href;
     }
+
+    // 部分回复弹层的时间不是链接，但仍有独立的原推 status 链接。
+    // 正文里的其他推文链接、嵌套引用卡的链接不能作为当前回复对象的 ID。
+    const ownStatusLink = (container) => {
+      for (const a of container.querySelectorAll('a[href]')) {
+        if (!/^https?:\/\/(?:www\.|mobile\.)?(?:x|twitter)\.com\/(?:[^/?#]+|i\/web)\/status\/\d+(?:[/?#]|$)/i.test(a.href || '')) continue;
+        if (a.closest('[data-testid="tweetText"], [contenteditable="true"]')) continue;
+        if (!isOwnMetadata(a)) continue;
+        return a.href;
+      }
+      return '';
+    };
+    // 优先使用可验证的原推 status 链接。
+    url = ownStatusLink(cardEl) || (rootEl !== cardEl && ownStatusLink(rootEl)) || url;
 
     // 媒体类型（同样自身 + 后代 + 回溯三级）
     const media = [];

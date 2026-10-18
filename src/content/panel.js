@@ -31,6 +31,8 @@
     timer: null,
     elapsed: 0,
     composer: null,
+    targetSnapshot: null,
+    composerHintOnly: false,
     pinned: false, // 用户是否手动拖过面板（拖过就不再自动定位）
     lastGenKey: null, // 最近一次自动生成对应的推文键（防同一条重复自动请求）
     lastGenTweet: null,
@@ -486,7 +488,9 @@
   };
 
   function setTarget(tweet, composer) {
-    if (!U.sameTweet(state.tweet, tweet)) {
+    const same = U.sameTweet(state.tweet, tweet);
+    const continuous = !same && composer && matchesComposer(composer, state.tweet);
+    if (!same && !continuous) {
       cancelRequest();
       state.contextVersion++;
       state.results = [];
@@ -496,8 +500,13 @@
       state.failed = false;
       renderEmpty();
     }
-    state.tweet = tweet;
+    // 原文字节点未变、仅新增译文时，保留生成候选实际使用的原文。
+    if (!continuous) state.tweet = tweet;
     state.composer = composer;
+    if (!continuous) {
+      state.targetSnapshot = composer && D.captureTargetSnapshot ? D.captureTargetSnapshot(composer) : null;
+      state.composerHintOnly = !!(composer && !D.extractTargetTweet(composer));
+    }
     state.pending = !composer;
   }
 
@@ -527,6 +536,8 @@
     state.resultsTweet = null;
     state.tweet = null;
     state.composer = null;
+    state.targetSnapshot = null;
+    state.composerHintOnly = false;
     state.pending = false;
     if (host) host.classList.remove('is-open');
     if (host) stopTimer();
@@ -702,9 +713,13 @@
   function matchesComposer(composer, tweet) {
     if (!composer || !composer.dialog || !composer.isReply) return false;
     const extracted = D.extractTargetTweet(composer);
-    if (extracted) return U.sameTweet(extracted, tweet);
+    if (extracted) {
+      return U.sameTweet(extracted, tweet) || !!(D.matchesTargetSnapshot &&
+        D.matchesTargetSnapshot(composer, state.targetSnapshot, tweet, extracted));
+    }
     // 无法读取正文时，只信任 P.open 用一次性点击兜底绑定过的那个弹层。
-    return !!(state.composer && state.composer.dialog === composer.dialog && U.sameTweet(state.tweet, tweet));
+    return !!(state.composerHintOnly && state.composer &&
+      state.composer.dialog === composer.dialog && U.sameTweet(state.tweet, tweet));
   }
 
   function isCurrentRequest(request) {
