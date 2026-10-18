@@ -1,6 +1,7 @@
 # 录制/调试临时产物（.rec-profile 含从主 Chrome 复制的用户数据，严禁入库）
 .rec-*/
 dev/_record/
+dev/_promo*/
 
 # WorkBuddy 工作台浏览器 profile / 打包产物 / 会话记忆
 .wb-browser/

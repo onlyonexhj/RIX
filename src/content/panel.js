@@ -15,6 +15,8 @@
   const D = XAI.detector;
   const E = XAI.editor;
   const P = (XAI.panel = {});
+  const T = (source, values) => XAI.i18n ? XAI.i18n.t(source, values) :
+    source.replace(/\{(\w+)\}/g, (match, key) => values && values[key] !== undefined ? values[key] : match);
 
   let host = null; // 面板根节点（挂在 body 下）
   let state = {
@@ -48,25 +50,34 @@
   let configRevision = 0;
   let configSave = null;
   let pendingConfig = {};
+  let savingConfigPatch = null;
+  let latestLocaleEvent = null;
+  let localeEventRevision = 0;
+  let statusLabel = null;
+  let emptyMessage = '';
 
   function saveConfig(patch) {
     Object.assign(cfg, patch);
     configRevision++;
     Object.assign(pendingConfig, patch);
-    persistPendingConfig().catch((e) => U.toast('保存设置失败：' + String(e.message || e), 'err'));
+    persistPendingConfig().catch((e) => U.toast(T('保存设置失败：{error}', { error: String(e.message || e) }), 'err'));
   }
 
   function flushConfig() {
     if (configSave) return configSave;
     if (!Object.keys(pendingConfig).length) return Promise.resolve();
     const patch = pendingConfig;
+    const localeAtStart = localeEventRevision;
     pendingConfig = {};
+    savingConfigPatch = patch;
     const saving = Promise.resolve().then(() => XAI.setConfig(patch)).catch((error) => {
       // 保存失败时保留改动；随后排队的新值优先于失败批次中的旧值。
       pendingConfig = Object.assign({}, patch, pendingConfig);
       throw error;
     }).finally(() => {
       if (configSave === saving) configSave = null;
+      if (savingConfigPatch === patch) savingConfigPatch = null;
+      applyStoredLocale(patch.uiLang === undefined ? -1 : localeAtStart);
     });
     configSave = saving;
     return saving;
@@ -134,6 +145,11 @@
 .xai-grp__b:last-child{border-right:0}
 .xai-grp__b:hover{background:#1c2732;color:#e7e9ea}
 .xai-grp__b.is-on{background:#1d9bf0;color:#fff;font-weight:600}
+.xai-grp[data-k="style"]{flex:1 1 100%;min-width:0}
+.xai-grp__bs{display:flex;flex-wrap:wrap;min-width:0}
+.xai-grp[data-k="style"] .xai-grp__bs{flex:1}
+.xai-locale-row{display:flex;flex:1 1 100%;align-items:center;gap:9px;font-size:12px;color:#8b98a5;min-width:0}
+.xai-locale-row .xai-sel{flex:1;min-width:0}
 .xai-sel{background:#0f1620;border:1px solid #2f3b47;color:#e7e9ea;border-radius:8px;
   padding:5px 7px;font-size:12px;outline:none;cursor:pointer;flex:none}
 .xai-sel:focus{border-color:#1d9bf0}
@@ -152,6 +168,7 @@
 .xai-btn--stop:hover{background:#571d20}
 .xai-btn--mini{flex:none;background:#22303c;color:#b7c3cc;padding:8px 12px;font-size:12.5px}
 .xai-btn--mini:hover{background:#2c3d4b;color:#fff}
+.xai-btn{min-width:0;white-space:normal;line-height:1.35}
 
 .xai-bar{height:3px;background:#22303c;flex:none;overflow:hidden}
 .xai-bar__i{height:100%;width:0;background:linear-gradient(90deg,#1d9bf0,#7856ff);transition:width .3s}
@@ -210,39 +227,40 @@
     host = document.createElement('div');
     host.className = 'xai-panel';
     host.innerHTML = `
-      <div class="xai-hd" title="按住拖动可移动面板，双击此处复位">
+      <div class="xai-hd" data-i18n-title="按住拖动可移动面板，双击此处复位" title="按住拖动可移动面板，双击此处复位">
         <div class="xai-hd__ico">✦</div>
-        <div class="xai-hd__t">AI 回复助手</div>
-        <button class="xai-hd__reset" title="复位到默认位置">复位</button>
+        <div class="xai-hd__t" data-i18n="AI 回复助手">AI 回复助手</div>
+        <button class="xai-hd__reset" data-i18n="复位" data-i18n-title="复位到默认位置" title="复位到默认位置">复位</button>
         <div class="xai-hd__grab">⠿</div>
-        <button class="xai-hd__x" title="关闭">✕</button>
+        <button class="xai-hd__x" data-i18n-title="关闭" title="关闭">✕</button>
       </div>
 
       <div class="xai-src" style="display:none">
-        <div class="xai-src__m">回复对象</div>
+        <div class="xai-src__m" data-i18n="回复对象">回复对象</div>
         <div class="xai-src__t"></div>
       </div>
 
       <div class="xai-ctl">
         <div class="xai-grp" data-k="style">
-          <div class="xai-grp__lb">风格</div>
+          <div class="xai-grp__lb" data-i18n="风格">风格</div>
           <div class="xai-grp__bs"></div>
         </div>
         <div class="xai-grp" data-k="count">
-          <div class="xai-grp__lb">条数</div>
+          <div class="xai-grp__lb" data-i18n="条数">条数</div>
           <div class="xai-grp__bs"></div>
         </div>
-        <select class="xai-sel" data-k="lang" title="输出语言">
-          ${XAI.langs.map((l) => `<option value="${l.id}">${l.label}</option>`).join('')}
-        </select>
+        <select class="xai-sel" data-k="lang" data-i18n-title="输出语言" data-i18n-aria-label="输出语言" title="输出语言"></select>
+        <label class="xai-locale-row"><span data-i18n="界面语言">界面语言</span>
+          <select class="xai-sel" data-k="uiLang" data-i18n-aria-label="界面语言"></select>
+        </label>
       </div>
 
       <div class="xai-act">
-        <label class="xai-auto" title="勾选：打开面板即自动生成回复；不勾选：手动点「生成回复」">
-          <input type="checkbox" class="xai-auto__cb" />自动生成
+        <label class="xai-auto" data-i18n-title="勾选：打开面板即自动生成回复；不勾选：手动点「生成回复」" title="勾选：打开面板即自动生成回复；不勾选：手动点「生成回复」">
+          <input type="checkbox" class="xai-auto__cb" /><span data-i18n="自动生成">自动生成</span>
         </label>
         <button class="xai-btn xai-btn--go">✦ 生成回复</button>
-        <button class="xai-btn xai-btn--stop" style="display:none">中止</button>
+        <button class="xai-btn xai-btn--stop" data-i18n="中止" style="display:none">中止</button>
       </div>
 
       <div class="xai-bar" style="display:none"><div class="xai-bar__i"></div></div>
@@ -258,6 +276,7 @@
       styleWrap: host.querySelector('[data-k="style"] .xai-grp__bs'),
       countWrap: host.querySelector('[data-k="count"] .xai-grp__bs'),
       lang: host.querySelector('[data-k="lang"]'),
+      uiLang: host.querySelector('[data-k="uiLang"]'),
       go: host.querySelector('.xai-btn--go'),
       autoCb: host.querySelector('.xai-auto__cb'),
       stop: host.querySelector('.xai-btn--stop'),
@@ -270,16 +289,48 @@
       reset: host.querySelector('.xai-hd__reset'),
     };
 
-    // 风格按钮
-    els.styleWrap.innerHTML = XAI.styles
-      .map((s) => `<button class="xai-grp__b" data-v="${s.id}" title="${U.escapeHtml(s.desc)}">${s.label}</button>`)
-      .join('');
+    renderLocale();
     // 条数按钮
     els.countWrap.innerHTML = [1, 2, 3, 4, 5]
       .map((n) => `<button class="xai-grp__b" data-v="${n}">${n}</button>`)
       .join('');
 
     bind();
+  }
+
+  function renderLocale() {
+    if (XAI.i18n) {
+      XAI.i18n.setLocale(cfg.uiLang || 'auto');
+      host.setAttribute('lang', XAI.i18n.getLocale());
+      XAI.i18n.apply(host);
+    }
+    els.styleWrap.innerHTML = XAI.styles
+      .map((s) => `<button class="xai-grp__b" data-v="${s.id}" title="${U.escapeHtml(T(s.desc))}">${U.escapeHtml(T(s.label))}</button>`)
+      .join('');
+    markOn(els.styleWrap, els.styleWrap.querySelector(`[data-v="${cfg.style}"]`));
+    els.lang.innerHTML = XAI.langs.map((item) =>
+      `<option value="${item.id}">${U.escapeHtml(T(item.label))}</option>`).join('');
+    els.lang.value = cfg.lang;
+    const uiLanguages = XAI.i18n ? XAI.i18n.languages : [{ id: 'auto', label: '跟随浏览器' }];
+    els.uiLang.innerHTML = uiLanguages.map((item) =>
+      `<option value="${item.id}">${U.escapeHtml(item.id === 'auto' ? T('跟随浏览器') : item.label)}</option>`)
+      .join('');
+    els.uiLang.value = uiLanguages.some((item) => item.id === cfg.uiLang) ? cfg.uiLang : 'auto';
+    setLoading(state.loading);
+    if (state.results.length) renderList(true);
+    else renderEmpty(emptyMessage);
+    if (state.tweet) refreshSrc();
+    if (statusLabel) setStatus(statusLabel.source, statusLabel.kind, statusLabel.values);
+    if (state.open) schedulePosition();
+  }
+
+  function applyStoredLocale(afterRevision) {
+    if (!latestLocaleEvent || latestLocaleEvent.revision <= afterRevision) return;
+    if (pendingConfig.uiLang !== undefined || (savingConfigPatch && savingConfigPatch.uiLang !== undefined)) return;
+    if (latestLocaleEvent.language !== cfg.uiLang) {
+      cfg.uiLang = latestLocaleEvent.language;
+      renderLocale();
+    }
   }
 
   function bind() {
@@ -301,6 +352,16 @@
     });
 
     els.lang.addEventListener('change', () => saveConfig({ lang: els.lang.value }));
+    els.uiLang.addEventListener('change', () => {
+      saveConfig({ uiLang: els.uiLang.value });
+      renderLocale();
+    });
+    if (chrome.storage && chrome.storage.onChanged) chrome.storage.onChanged.addListener((changes, area) => {
+      if (area !== 'local' || !changes[XAI.storageKey]) return;
+      const next = changes[XAI.storageKey].newValue || XAI.defaults;
+      latestLocaleEvent = { language: next.uiLang || 'auto', revision: ++localeEventRevision };
+      applyStoredLocale(-1);
+    });
 
     // 「自动生成」复选框：与设置页「交互行为」里的开关是同一个配置项
     els.autoCb.addEventListener('change', () => {
@@ -320,8 +381,8 @@
       if (cp) {
         e.stopPropagation();
         navigator.clipboard.writeText(cp.dataset.txt).then(
-          () => U.toast('已复制', 'ok'),
-          () => U.toast('复制失败', 'err')
+          () => U.toast(T('已复制'), 'ok'),
+          () => U.toast(T('复制失败'), 'err')
         );
         return;
       }
@@ -374,7 +435,7 @@
 
     const onDown = (e) => {
       // 点在按钮上就不拖
-      if (e.target.closest('button')) return;
+      if (e.target.closest('button, select, label')) return;
       if (e.button !== undefined && e.button !== 0) return;
 
       dragging = true;
@@ -443,7 +504,7 @@
   P.resetPosition = function resetPosition() {
     state.pinned = false;
     position();
-    U.toast('已复位到默认位置');
+    U.toast(T('已复位到默认位置'));
   };
 
   /* ------------------------------------------------------------------ *
@@ -454,11 +515,17 @@
     build();
     const revision = ++openRevision;
     const loadedAt = configRevision;
+    const localeAtRead = localeEventRevision;
     await waitForConfigSave();
     const loaded = await XAI.getConfig();
     if (revision !== openRevision) return false;
-    if (loadedAt === configRevision) cfg = loaded;
+    if (loadedAt === configRevision) {
+      const currentLocale = cfg.uiLang;
+      cfg = loaded;
+      if (localeAtRead !== localeEventRevision) cfg.uiLang = currentLocale;
+    }
     if (!cfg.enabled) { P.close(); return false; }
+    renderLocale();
 
     // null 是明确的「待填入」模式，不能绑定首页内联框或另一个发帖框。
     let current = null;
@@ -519,7 +586,7 @@
     }
     els.src.style.display = '';
     const head = [t.author, t.handle].filter(Boolean).join(' ');
-    els.srcText.textContent = head + '\n' + (t.text || '（纯媒体推文）');
+    els.srcText.textContent = head + '\n' + (t.text || T('（纯媒体推文）'));
   }
 
   P.close = function close() {
@@ -648,7 +715,7 @@
     if (!state.open || state.loading || !state.tweet) return;
     const fresh = D.findComposer();
     if (!state.pending && !matchesComposer(fresh, state.tweet)) {
-      U.toast('回复对象已变化，请重新打开这条推文的回复面板', 'err');
+      U.toast(T('回复对象已变化，请重新打开这条推文的回复面板'), 'err');
       return;
     }
     if (matchesComposer(fresh, state.tweet)) {
@@ -657,7 +724,7 @@
     }
 
     if (!state.tweet || (!state.tweet.text && !(state.tweet.media || []).length)) {
-      U.toast('未能读取推文正文，无法生成', 'err');
+      U.toast(T('未能读取推文正文，无法生成'), 'err');
       setStatus('未能读取推文正文，请先关闭弹层再点时间线的 ✦ 按钮', 'err');
       return;
     }
@@ -703,7 +770,7 @@
       }
       const res = await chrome.runtime.sendMessage({ type: 'xai:generate', payload });
       if (!isCurrentRequest(request)) return;
-      if (!res || !res.ok) throw new Error((res && res.error) || '未知错误');
+      if (!res || !res.ok) throw new Error((res && res.error) || T('未知错误'));
       onDone(res.data, request);
     } catch (e) {
       if (isCurrentRequest(request)) onFail(String((e && e.message) || e), request);
@@ -786,7 +853,7 @@
             renderList(true);
           }
         } else if (msg.type === 'thinking') {
-          setStatus('模型思考中… ' + U.fmtDuration(state.elapsed), 'busy');
+          setStatus('模型思考中… {elapsed}', 'busy', { elapsed: U.fmtDuration(state.elapsed) });
         } else if (msg.type === 'done') {
           onDone(msg, request);
           finish();
@@ -795,7 +862,7 @@
         }
       };
 
-      const onDisconnect = () => finish(new Error('生成连接已断开'));
+      const onDisconnect = () => finish(new Error(T('生成连接已断开')));
       port.onMessage.addListener(onMessage);
       port.onDisconnect.addListener(onDisconnect);
 
@@ -833,10 +900,9 @@
     renderList();
     const ttfb = state.streamFirstAt ? (state.streamFirstAt - state.startedAt) / 1000 : 0;
     setStatus(
-      `${list.length} 条 · ${(data.elapsedMs / 1000).toFixed(1)}s` +
-        (ttfb ? `（首字 ${ttfb.toFixed(1)}s）` : '') +
-        ` · ${data.model}`,
-      'ok'
+      ttfb ? '{count} 条 · {elapsed}s（首字 {first}s） · {model}' : '{count} 条 · {elapsed}s · {model}',
+      'ok', { count: list.length, elapsed: (data.elapsedMs / 1000).toFixed(1),
+        first: ttfb.toFixed(1), model: data.model }
     );
     setLoading(false);
     stopTimer();
@@ -854,7 +920,7 @@
     stopTimer();
     setStatus(msg, 'err');
     if (!state.results.length) renderEmpty(msg);
-    U.toast(msg, 'err', 5000);
+    U.toast(XAI.i18n && XAI.i18n.translateError ? XAI.i18n.translateError(msg) : T(msg), 'err', 5000);
     schedulePosition();
   }
 
@@ -901,7 +967,7 @@
       if (state.loading) {
         // 已经在流式输出正文时，不再用"生成中…"覆盖更具体的状态
         if (!state.streamText) {
-          setStatus(`生成中… ${U.fmtDuration(state.elapsed)}`, 'busy');
+          setStatus('生成中… {elapsed}', 'busy', { elapsed: U.fmtDuration(state.elapsed) });
         }
       }
       // >30s 显示进度条（用对数曲线，永不假装能到 100%）
@@ -929,16 +995,18 @@
     els.go.disabled = on;
     els.stop.style.display = on ? 'flex' : 'none';
     if (on) {
-      els.go.innerHTML = '<span class="xai-spin"></span> 生成中';
+      els.go.innerHTML = '<span class="xai-spin"></span> ' + U.escapeHtml(T('生成中'));
     } else {
       // 失败后保留「重试」文案，且按钮恢复可点
-      els.go.innerHTML = state.failed ? '↻ 重试' : '✦ 生成回复';
+      els.go.textContent = state.failed ? '↻ ' + T('重试') : '✦ ' + T('生成回复');
       els.go.disabled = false;
     }
   }
 
-  function setStatus(text, kind) {
-    els.st.textContent = text;
+  function setStatus(source, kind, values) {
+    statusLabel = { source, kind, values };
+    els.st.textContent = !values && XAI.i18n && XAI.i18n.translateError ?
+      XAI.i18n.translateError(source) : T(source, values);
     els.st.className = 'xai-st' + (kind === 'err' ? ' xai-st--err' : '');
   }
 
@@ -947,10 +1015,11 @@
    * ------------------------------------------------------------------ */
 
   function renderEmpty(msg) {
+    emptyMessage = msg || '';
     els.list.innerHTML = `
       <div class="xai-empty">
         <div class="xai-empty__ico">✦</div>
-        ${msg ? U.escapeHtml(msg) : '选择风格后点「生成回复」<br>结果会出现在这里，点击任一条即可回填'}
+        ${msg ? U.escapeHtml(T(msg)) : U.escapeHtml(T('选择风格后点「生成回复」')) + '<br>' + U.escapeHtml(T('结果会出现在这里，点击任一条即可回填'))}
       </div>`;
   }
 
@@ -972,9 +1041,9 @@
       <div class="xai-it" data-i="${i}">
         <div class="xai-it__x">${U.escapeHtml(t)}</div>
         <div class="xai-it__f">
-          <span class="xai-chip${over ? ' xai-chip--warn' : ''}">${w}/280${over ? ' 超长' : ''}</span>
-          <button class="xai-it__cp" data-txt="${U.escapeHtml(t)}">复制</button>
-          <span class="xai-it__u">填入 →</span>
+          <span class="xai-chip${over ? ' xai-chip--warn' : ''}">${w}/280${over ? ' ' + U.escapeHtml(T('超长')) : ''}</span>
+          <button class="xai-it__cp" data-txt="${U.escapeHtml(t)}">${U.escapeHtml(T('复制'))}</button>
+          <span class="xai-it__u">${U.escapeHtml(T('填入'))} →</span>
         </div>
       </div>`;
       })
@@ -1001,7 +1070,7 @@
     if (xEl) xEl.textContent = text;
     if (cEl) {
       const w = U.weightedLength(text);
-      cEl.textContent = `${w}/280${w > 280 ? ' 超长' : ''}`;
+      cEl.textContent = `${w}/280${w > 280 ? ' ' + T('超长') : ''}`;
       cEl.className = 'xai-chip' + (w > 280 ? ' xai-chip--warn' : '');
     }
     const cp = node.querySelector('.xai-it__cp');
@@ -1018,14 +1087,14 @@
 
     const c = D.findComposer();
     if (!matchesComposer(c, state.resultsTweet)) {
-      U.toast('请先打开这条推文的回复弹层，确认回复对象后再填入', 'err', 4200);
+      U.toast(T('请先打开这条推文的回复弹层，确认回复对象后再填入'), 'err', 4200);
       setStatus('回复对象尚未匹配，未填入', 'warn');
       return false;
     }
 
     const context = state.contextVersion;
     if (!(await E.setText(c.editor, text))) {
-      U.toast('未能填入输入框，请重试', 'err');
+      U.toast(T('未能填入输入框，请重试'), 'err');
       return false;
     }
     if (!state.open || context !== state.contextVersion) return false;
@@ -1041,7 +1110,7 @@
     }
 
     const ctr = E.getCounter(c.dialog);
-    U.toast('已填入输入框' + (ctr ? '（字数 ' + ctr + '）' : ''), 'ok');
+    U.toast(T('已填入输入框') + (ctr ? T('（字数 {count}）', { count: ctr }) : ''), 'ok');
     // 不关闭面板，方便连续挑选
     return true;
   };
@@ -1064,8 +1133,8 @@
     renderList();
     setStatus(
       (meta && meta.status) ||
-        `${state.results.length} 条 · ${((meta && meta.elapsedMs) || 2100) / 1000}s · glm-4.6`,
-      'ok'
+        '{count} 条 · {elapsed}s · {model}',
+      'ok', { count: state.results.length, elapsed: ((meta && meta.elapsedMs) || 2100) / 1000, model: 'glm-4.6' }
     );
     setLoading(false);
     stopTimer();
@@ -1079,7 +1148,7 @@
     if (!host) return;
     els.src.style.display = '';
     const head = [tweet.author, tweet.handle].filter(Boolean).join(' ');
-    els.srcText.textContent = head + '\n' + (tweet.text || '（纯媒体推文）');
+    els.srcText.textContent = head + '\n' + (tweet.text || T('（纯媒体推文）'));
     setStatus('点时间线的回复气泡打开弹层后，点结果即可回填', 'warn');
   };
 

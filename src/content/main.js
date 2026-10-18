@@ -13,6 +13,8 @@
   const U = XAI.utils;
   const D = XAI.detector;
   const P = XAI.panel;
+  const T = (source, values) => XAI.i18n ? XAI.i18n.t(source, values) :
+    source.replace(/\{(\w+)\}/g, (match, key) => values && values[key] !== undefined ? values[key] : match);
 
   if (!U.isXDomain()) return;
   if (window.__xaiInited) return; // 防重复注入
@@ -32,12 +34,14 @@
 
   async function init() {
     cfg = await XAI.getConfig();
+    refreshLocale();
     if (cfg.debug) console.log('[XAI] init', cfg);
 
     // SPA 路由切换后配置可能变了
     chrome.storage.onChanged.addListener(async (changes, area) => {
       if (area === 'local' && changes[XAI.storageKey]) {
         cfg = changes[XAI.storageKey].newValue || XAI.defaults;
+        Promise.resolve().then(refreshLocale);
         applyEnabled();
       }
     });
@@ -57,6 +61,14 @@
       replyClick = null;
       P.close();
       hideHoverBtn();
+    }
+  }
+
+  function refreshLocale() {
+    if (XAI.i18n && !P.isOpen()) XAI.i18n.setLocale(cfg.uiLang || 'auto');
+    if (hoverBtn) {
+      hoverBtn.textContent = '✦ ' + T('AI 回复');
+      hoverBtn.title = T('AI 生成回复');
     }
   }
 
@@ -119,7 +131,7 @@
           try {
             if (await P.open(fresh, tweet)) P.autoGenerate();
           } catch (e) {
-            U.toast('打开回复面板失败：' + String(e.message || e), 'err');
+            U.toast(T('打开回复面板失败：{error}', { error: String(e.message || e) }), 'err');
           }
         }, 260);
       }
@@ -150,6 +162,7 @@
 
   function onHover(e) {
     if (!cfg.enabled || !cfg.showFloatingButton) return;
+    refreshLocale();
     if (hoverBtn && hoverBtn.contains(e.target)) return;
 
     const art = D.findTweetArticle(e.target);
@@ -187,8 +200,8 @@
     if (!hoverBtn) {
       hoverBtn = document.createElement('button');
       hoverBtn.className = 'xai-float';
-      hoverBtn.textContent = '✦ AI 回复';
-      hoverBtn.title = 'AI 生成回复';
+      hoverBtn.textContent = '✦ ' + T('AI 回复');
+      hoverBtn.title = T('AI 生成回复');
       hoverBtn.addEventListener('click', async (ev) => {
         ev.preventDefault();
         ev.stopPropagation();
@@ -196,7 +209,7 @@
         const t = D.extractTweetFromArticle(a);
         // 点悬浮按钮 = 等价于点回复气泡：直接开面板
         try { await openFor(t); }
-        catch (e) { U.toast('打开回复面板失败：' + String(e.message || e), 'err'); }
+        catch (e) { U.toast(T('打开回复面板失败：{error}', { error: String(e.message || e) }), 'err'); }
       });
       document.body.appendChild(hoverBtn);
     }
@@ -222,7 +235,7 @@
   /** 没有弹层时（用户直接点悬浮按钮）：自己造一个"伪编辑器"上下文，生成后仍需用户点回复来填入 */
   async function openFor(tweet) {
     if (!tweet) {
-      U.toast('未能读取这条推文的内容', 'err');
+      U.toast(T('未能读取这条推文的内容'), 'err');
       return;
     }
     // 先尝试真实弹层（点回复后才有编辑器）

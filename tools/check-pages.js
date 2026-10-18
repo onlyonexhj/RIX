@@ -29,6 +29,7 @@ const PROVIDES = {
     'weightedLength', 'toast', 'uid', 'isXDomain',
   ],
   'prompt.js': ['renderTemplate', 'findUnknownVars', 'buildPrompt'],
+  'i18n.js': ['i18n'],
   'proxy.js': ['extractHost', 'buildScheme', 'apply', 'get', 'clear', 'diagnose'],
 };
 

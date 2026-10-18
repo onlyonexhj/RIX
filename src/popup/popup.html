@@ -62,27 +62,32 @@
 <body>
   <div class="hd">
     <div class="logo">✦</div>
-    <b>X AI 回复助手</b>
-    <label class="sw"><input type="checkbox" id="enabled" /><i></i></label>
+    <b data-i18n="X AI 回复助手">X AI 回复助手</b>
+    <label class="sw" data-i18n-title="启用插件"><input type="checkbox" id="enabled" aria-label="启用插件" data-i18n-aria-label="启用插件" /><i></i></label>
   </div>
 
   <div class="bd">
     <div class="row">
-      <span>默认风格</span>
+      <span data-i18n="界面语言">界面语言</span>
+      <select id="uiLang" aria-label="界面语言" data-i18n-aria-label="界面语言"></select>
+    </div>
+    <div class="row">
+      <span data-i18n="默认风格">默认风格</span>
       <select id="style"></select>
     </div>
     <div class="row">
-      <span>生成条数</span>
+      <span data-i18n="生成条数">生成条数</span>
       <select id="count">
         <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
       </select>
     </div>
-    <button class="btn" id="openX">打开 X 时间线</button>
-    <button class="btn btn--ghost" id="openOpt">全部设置</button>
+    <button class="btn" id="openX" data-i18n="打开 X 时间线">打开 X 时间线</button>
+    <button class="btn btn--ghost" id="openOpt" data-i18n="全部设置">全部设置</button>
     <div class="st" id="st"></div>
   </div>
 
   <script src="../shared/config.js"></script>
+  <script src="../shared/i18n.js"></script>
   <script src="../shared/utils.js"></script>
   <script src="popup.js"></script>
 </body>

@@ -41,8 +41,8 @@ eq('日文推注入日文指令', p2.system.includes('日本語で返信して�
 // 3) 英文推 → 英文指令
 const p3 = XAI.buildPrompt(tweetEn, { style: 'auto' }, {});
 eq('英文推注入英文指令', p3.system.includes('Must reply in English'), true);
-eq('韩文推走英文指令', XAI.buildPrompt({ text: '안녕하세요 반갑습니다' }, { style: 'auto' }, {})
-  .system.includes('Must reply in English'), true);
+eq('韩文推跟随原文使用韩文', XAI.buildPrompt({ text: '안녕하세요 반갑습니다' }, { style: 'auto' }, {})
+  .system.includes('반드시 한국어로 답글'), true);
 
 // 4) plain 模式 → 序号格式段，无 JSON 约束
 const p4 = XAI.buildPrompt(tweetZh, { style: 'auto', promptFormat: 'plain' }, {});

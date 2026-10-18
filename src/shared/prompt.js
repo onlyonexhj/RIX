@@ -31,16 +31,19 @@
     long: '较长，3 句以上，可以展开一个完整观点。',
   };
 
-  const LANG_NAME = { zh: '简体中文', en: 'English', ja: '日本語', ko: '한국어' };
+  const LANG_NAME = { zh: '简体中文', en: 'English', ja: '日本語', vi: 'Tiếng Việt', ko: '한국어' };
 
   /* ------------------------------------------------------------------
-   * auto 风格（按推文自动选口吻/语言，不合适就 SKIP）
-   * 语言指令按「原推语种」在构建时算好注入，不让模型自己猜。
+   * auto 风格（按推文自动选口吻，不合适就 SKIP）
+   * 显式选择的回复语言优先；只有 lang=auto 才按原推语种注入指令。
    * ------------------------------------------------------------------ */
   const AUTO_LANG_RULE = {
     ja: '【言語】日本語で返信してください【長さ】15〜50文字、完整句子自然表达',
     zh: '【语言】必须用中文回复【长度】15-50字，不要压缩成口号，用完整的口语化句子',
-    // en / ko / unknown 一律按「其他」走英文
+    ko: '【언어】반드시 한국어로 답글을 작성하세요.【길이】15~50자, 자연스럽고 완전한 문장으로 표현하세요.',
+    vi: '【Ngôn ngữ】Phải trả lời bằng tiếng Việt.【Độ dài】15–50 ký tự, diễn đạt tự nhiên bằng câu hoàn chỉnh.',
+    en: '【Language】Must reply in English【Length】15-50 chars, natural complete sentences',
+    // 原文语种无法识别时沿用自动风格的英文兜底。
     other: '【Language】Must reply in English【Length】15-50 chars, natural complete sentences',
   };
 
@@ -143,9 +146,10 @@
     const lenDef = XAI.lengths.find((s) => s.id === (extra.length || cfg.length));
 
     const srcLang = XAI.utils.detectLang(tweet.text || '');
-    const wantLang =
-      (extra.lang && extra.lang !== 'auto' && extra.lang) ||
-      (cfg.lang && cfg.lang !== 'auto' ? cfg.lang : srcLang === 'unknown' ? 'zh' : srcLang);
+    const requestedLang = extra.lang || cfg.lang || 'auto';
+    const wantLang = requestedLang === 'auto'
+      ? (srcLang === 'unknown' ? 'zh' : srcLang)
+      : requestedLang;
 
     // 条数：显式判断而非 || —— 0 是合法输入（会被钳到下限 1），
     // 用 || 会让 0 被当成「未设置」而回退到默认 3
@@ -163,9 +167,10 @@
       .join('；')
       .trim();
 
-    // auto 风格：语言指令按「原推语种」在本地算好注入，不让模型自己猜
+    // 自动风格只自动选择口吻；不能覆盖用户在面板/设置页明确指定的输出语言。
     const isAuto = !!(styleDef && styleDef.id === 'auto');
-    const langRule = isAuto ? (AUTO_LANG_RULE[srcLang] || AUTO_LANG_RULE.other) : '';
+    const autoLang = requestedLang === 'auto' && srcLang === 'unknown' ? 'other' : wantLang;
+    const langRule = isAuto ? (AUTO_LANG_RULE[autoLang] || AUTO_LANG_RULE.other) : '';
 
     // 视觉：开关打开且推文带图时，把图片 URL 交给 SW 拼多模态消息（最多 4 张控成本）
     const images = cfg.vision && Array.isArray(tweet.images)

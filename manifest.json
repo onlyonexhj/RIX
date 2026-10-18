@@ -31,6 +31,7 @@
       "js": [
         "src/shared/config.js",
         "src/shared/utils.js",
+        "src/shared/i18n.js",
         "src/content/detector.js",
         "src/content/editor.js",
         "src/content/panel.js",

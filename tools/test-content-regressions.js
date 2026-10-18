@@ -43,6 +43,7 @@ class Element {
   contains(node) { return this === node || this.children.some((child) => child.contains(node)); }
   setAttribute(name, value) { this.attrs[name] = String(value); }
   getAttribute(name) { return this.attrs[name] ?? null; }
+  hasAttribute(name) { return name in this.attrs; }
   get href() { return this.attrs.href || ''; }
   matches(selector) {
     return selector.split(',').some((part) => {
@@ -127,7 +128,7 @@ function environment(patch = {}, withMain = false) {
   const window = { location: { hostname: 'x.com' }, innerWidth: 1600, innerHeight: 900, addEventListener() {} };
   const listenerSet = () => {
     const listeners = new Set();
-    return { addListener: (fn) => listeners.add(fn), removeListener: (fn) => listeners.delete(fn), emit: (msg) => [...listeners].forEach((fn) => fn(msg)), snapshot: () => [...listeners] };
+    return { addListener: (fn) => listeners.add(fn), removeListener: (fn) => listeners.delete(fn), emit: (...args) => [...listeners].forEach((fn) => fn(...args)), snapshot: () => [...listeners] };
   };
   const chrome = {
     storage: { onChanged: listenerSet() },
@@ -156,6 +157,7 @@ function environment(patch = {}, withMain = false) {
   const load = (file) => vm.runInContext(fs.readFileSync(path.join(root, file), 'utf8'), context, { filename: file });
   load('src/shared/config.js');
   load('src/shared/utils.js');
+  load('src/shared/i18n.js');
   load('src/content/detector.js');
   const XAI = window.XAI;
   const realDetector = XAI.detector;
@@ -383,6 +385,28 @@ async function run() {
     const e = environment(); e.current(null); await e.P.open(null, e.tweetA); const generating = e.P.generate(); await flush();
     e.current(e.a); await e.P.open(e.a); e.P.autoGenerate(); assert.equal(e.requests().length, 1);
     e.ports[0].onMessage.emit(done('reply A')); await generating; e.P.autoGenerate(); await flush(); assert.equal(e.requests().length, 1);
+  });
+  await test('an old configuration read cannot overwrite a newer interface language event', async () => {
+    const e = environment({ uiLang: 'en', style: 'humor' }); await e.P.open(e.a);
+    const gate = deferred(); const old = { ...e.saved() };
+    e.XAI.getConfig = () => gate.promise;
+    const opening = e.P.open(e.a); await flush();
+    e.chrome.storage.onChanged.emit({ [e.XAI.storageKey]: { newValue: { ...old, uiLang: 'ja' } } }, 'local');
+    gate.resolve(old); assert.equal(await opening, true);
+    assert.equal(e.element('[data-k="uiLang"]').value, 'ja');
+    assert.equal(e.XAI.i18n.getLocale(), 'ja');
+    assert.ok(e.element('[data-k="style"] [data-v="humor"]').classList.contains('is-on'));
+  });
+  await test('a later external language event is replayed after the local save completes', async () => {
+    const e = environment({ uiLang: 'zh' }); await e.P.open(e.a);
+    const gate = deferred(); e.XAI.setConfig = () => gate.promise;
+    const selector = e.element('[data-k="uiLang"]'); selector.value = 'en';
+    await selector.fire('change'); await flush();
+    e.chrome.storage.onChanged.emit({ [e.XAI.storageKey]: { newValue: { ...e.saved(), uiLang: 'en' } } }, 'local');
+    e.chrome.storage.onChanged.emit({ [e.XAI.storageKey]: { newValue: { ...e.saved(), uiLang: 'ja' } } }, 'local');
+    assert.equal(e.XAI.i18n.getLocale(), 'en');
+    gate.resolve({ ...e.saved(), uiLang: 'en' }); await flush();
+    assert.equal(e.XAI.i18n.getLocale(), 'ja'); assert.equal(selector.value, 'ja');
   });
   console.log(`\n${passed} content regression tests passed.`);
 }

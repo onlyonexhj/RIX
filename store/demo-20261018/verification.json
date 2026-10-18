@@ -1,0 +1,23 @@
+{
+  "file": "x-ai-reply-demo-1080p.mp4",
+  "duration_seconds": 60.0,
+  "resolution": [
+    1920,
+    1080
+  ],
+  "fps": 30,
+  "video_codec": "H.264 High / yuv420p",
+  "audio_codec": "AAC / 48000 Hz / stereo",
+  "decoded_frames": 1800,
+  "full_video_audio_decode": "passed",
+  "bytes": 3613191,
+  "preview_frames_seconds": [
+    14.8,
+    33.5,
+    34.5,
+    38.0,
+    45.0,
+    53.0
+  ],
+  "demo_data": true
+}

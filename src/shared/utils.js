@@ -201,22 +201,25 @@
     return aImages.length > 0 && JSON.stringify(aImages) === JSON.stringify(bImages);
   };
 
-  /** 推断语言：返回 zh / en / ja / ko / unknown */
+  /** 推断语言：返回 zh / en / ja / vi / ko / unknown。无变音的越南语不强行猜测。 */
   U.detectLang = function detectLang(text) {
-    const s = String(text || '');
+    const s = String(text || '').normalize('NFC');
     if (!s.trim()) return 'unknown';
     const kana = (s.match(/[぀-ヿ]/g) || []).length;
     const hangul = (s.match(/[가-힯]/g) || []).length;
     const cjk = (s.match(/[一-鿿]/g) || []).length;
     const latin = (s.match(/[A-Za-z]/g) || []).length;
+    // â/ê/ô/é 等也见于法语、西班牙语，不能据此判越南语。
+    // 只使用越南语特征字母和带声调的扩展字母，兼容浏览器中的分解变音写法。
+    const vietnamese = /[ăđơưạ-ỹ]/i.test(s);
     // 日韩假名优先：汉字里常混用少量假名
     if (kana > 2) return 'ja';
     if (hangul > 2) return 'ko';
-    if (!cjk) return latin > 0 ? 'en' : 'unknown';
+    if (!cjk) return vietnamese ? 'vi' : latin > 0 ? 'en' : 'unknown';
     // 中英混排：中文语境里夹英文单词很常见，
     // 所以要求汉字数达到拉丁字母数的 1/2 才算中文主导（英文单词平均长于单汉字）
     if (cjk * 2 >= latin) return 'zh';
-    return 'en';
+    return vietnamese ? 'vi' : 'en';
   };
 
   /** X 的富文本节点里混有零宽字符，取纯文本时清掉 */

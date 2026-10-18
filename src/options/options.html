@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <title>X AI 回复助手 · 设置</title>
+  <title data-i18n="X AI 回复助手 · 设置">X AI 回复助手 · 设置</title>
   <link rel="stylesheet" href="options.css" />
 </head>
 <body>
@@ -10,33 +10,42 @@
     <header class="hd">
       <div class="hd__logo">✦</div>
       <div>
-        <h1>X AI 回复助手</h1>
-        <p class="hd__sub">在推文时间线点回复气泡，用 AI 生成多条回复候选并一键回填</p>
+        <h1 data-i18n="X AI 回复助手">X AI 回复助手</h1>
+        <p class="hd__sub" data-i18n="在推文时间线点回复气泡，用 AI 生成多条回复候选并一键回填">在推文时间线点回复气泡，用 AI 生成多条回复候选并一键回填</p>
       </div>
       <label class="switch">
         <input type="checkbox" id="enabled" />
         <span class="switch__tr"></span>
-        <span class="switch__lb" id="enabledLabel">已启用</span>
+        <span class="switch__lb" id="enabledLabel" data-i18n="已启用">已启用</span>
       </label>
     </header>
 
     <main class="body">
+      <section class="card" id="languageCard">
+        <h2 class="card__t" data-i18n="界面语言">界面语言</h2>
+        <div class="row">
+          <label class="lb" for="uiLang" data-i18n="插件界面语言">插件界面语言</label>
+          <select id="uiLang" class="in"></select>
+        </div>
+        <p class="tip" data-i18n="仅更改插件界面显示；AI 回复语言可在下方单独设置。">仅更改插件界面显示；AI 回复语言可在下方单独设置。</p>
+      </section>
+
       <!-- ========== 服务商 ========== -->
       <section class="card" id="welcome">
-        <h2 class="card__t">1 · AI 服务商</h2>
-        <p class="card__hint">所有请求都由你的浏览器直接发给所选服务商，密钥只存在本地（chrome.storage.local）。</p>
+        <h2 class="card__t" data-i18n="1 · AI 服务商">1 · AI 服务商</h2>
+        <p class="card__hint" data-i18n="所有请求都由你的浏览器直接发给所选服务商，密钥只存在本地（chrome.storage.local）。">所有请求都由你的浏览器直接发给所选服务商，密钥只存在本地（chrome.storage.local）。</p>
 
         <div class="row">
-          <label class="lb">快速预设</label>
+          <label class="lb" data-i18n="快速预设">快速预设</label>
           <select id="preset" class="in">
-            <option value="">— 选择预设自动填充 —</option>
+            <option value="" data-i18n="— 选择预设自动填充 —">— 选择预设自动填充 —</option>
           </select>
         </div>
 
         <div class="row">
-          <label class="lb">接口协议</label>
+          <label class="lb" data-i18n="接口协议">接口协议</label>
           <select id="provider" class="in">
-            <option value="openai">OpenAI 兼容（含 DeepSeek / GLM / Kimi / OpenRouter / Ollama）</option>
+            <option value="openai" data-i18n="OpenAI 兼容（含 DeepSeek / GLM / Kimi / OpenRouter / Ollama）">OpenAI 兼容（含 DeepSeek / GLM / Kimi / OpenRouter / Ollama）</option>
             <option value="anthropic">Anthropic Messages（Claude）</option>
           </select>
         </div>
@@ -48,7 +57,7 @@
         <p class="tip" id="baseUrlTip"></p>
 
         <div class="row">
-          <label class="lb">模型名</label>
+          <label class="lb" data-i18n="模型名">模型名</label>
           <input id="model" class="in" type="text" spellcheck="false" placeholder="glm-4.6" />
         </div>
 
@@ -56,85 +65,73 @@
           <label class="lb">API Key</label>
           <div class="in-wrap">
             <input id="apiKey" class="in" type="password" spellcheck="false" placeholder="sk-..." autocomplete="off" />
-            <button class="mini" id="peekKey" type="button">显示</button>
+            <button class="mini" id="peekKey" type="button" data-i18n="显示">显示</button>
           </div>
         </div>
 
         <div class="row2">
           <div class="row">
-            <label class="lb">最大生成长度</label>
+            <label class="lb" data-i18n="最大生成长度">最大生成长度</label>
             <input id="maxTokens" class="in" type="number" min="256" max="32000" step="256" />
           </div>
           <div class="row">
-            <label class="lb">超时（秒）</label>
+            <label class="lb" data-i18n="超时（秒）">超时（秒）</label>
             <input id="timeoutSec" class="in" type="number" min="10" max="600" step="5" />
           </div>
         </div>
 
-        <p class="tip tip--warn">
-          ⚠ <b>max_tokens 别调太小。</b>推理型模型（GLM 全系 / o 系列 / Claude 思考版）会先消耗 reasoning tokens 再输出正文，
-          给小了会出现「请求成功但正文是空字符串」且不报错的现象。低于 2000 极易踩坑。
-        </p>
+        <p class="tip tip--warn" data-i18n="⚠ max_tokens 别调太小。推理型模型（GLM 全系 / o 系列 / Claude 思考版）会先消耗 reasoning tokens 再输出正文， 给小了会出现「请求成功但正文是空字符串」且不报错的现象。低于 2000 极易踩坑。">⚠ max_tokens 别调太小。推理型模型（GLM 全系 / o 系列 / Claude 思考版）会先消耗 reasoning tokens 再输出正文， 给小了会出现「请求成功但正文是空字符串」且不报错的现象。低于 2000 极易踩坑。</p>
 
         <div class="row row--inline">
           <label class="cb">
             <input type="checkbox" id="disableThinking" />
-            <span>关闭 GLM 深度思考（写回复不需要思考链，更快更省）</span>
+            <span data-i18n="关闭 GLM 深度思考（写回复不需要思考链，更快更省）">关闭 GLM 深度思考（写回复不需要思考链，更快更省）</span>
           </label>
         </div>
 
         <div class="row row--inline">
           <label class="cb">
             <input type="checkbox" id="vision" />
-            <span>识别推文图片（把图片发给模型看；需模型支持视觉，如 GLM-4V / GPT-4o / Claude）</span>
+            <span data-i18n="识别推文图片（把图片发给模型看；需模型支持视觉，如 GLM-4V / GPT-4o / Claude）">识别推文图片（把图片发给模型看；需模型支持视觉，如 GLM-4V / GPT-4o / Claude）</span>
           </label>
         </div>
 
         <div class="act">
-          <button class="btn btn--pri" id="test" type="button">测试连接</button>
+          <button class="btn btn--pri" id="test" type="button" data-i18n="测试连接">测试连接</button>
           <span class="test-out" id="testOut"></span>
         </div>
       </section>
 
       <!-- ========== 网络 / 代理 ========== -->
       <section class="card" id="netCard">
-        <h2 class="card__t">2 · 网络与代理</h2>
+        <h2 class="card__t" data-i18n="2 · 网络与代理">2 · 网络与代理</h2>
 
-        <div class="tip tip--info" style="display:none" id="netNote">
-          💡 <b>挂 VPN 觉得慢？先看这两条：</b><br>
-          ① 保持<b>流式输出</b>开启 —— 第一个字约 1 秒就能看到，不用干等全部生成完；<br>
-          ② 下面可以检测当前网络；仅在现有固定代理可安全保留时对比 AI 直连。
-        </div>
+        <div class="tip tip--info" style="display:none" id="netNote" data-i18n="💡 挂 VPN 觉得慢？先看这两条： ① 保持流式输出开启 —— 第一个字约 1 秒就能看到，不用干等全部生成完； ② 下面可以检测当前网络；仅在现有固定代理可安全保留时对比 AI 直连。">💡 挂 VPN 觉得慢？先看这两条： ① 保持流式输出开启 —— 第一个字约 1 秒就能看到，不用干等全部生成完； ② 下面可以检测当前网络；仅在现有固定代理可安全保留时对比 AI 直连。</div>
 
         <div class="row">
-          <label class="lb">流式输出</label>
+          <label class="lb" data-i18n="流式输出">流式输出</label>
           <select id="stream" class="in">
-            <option value="1">开启（强烈推荐，感知延迟最低）</option>
-            <option value="0">关闭（兼容模式）</option>
+            <option value="1" data-i18n="开启（强烈推荐，感知延迟最低）">开启（强烈推荐，感知延迟最低）</option>
+            <option value="0" data-i18n="关闭（兼容模式）">关闭（兼容模式）</option>
           </select>
         </div>
-        <p class="tip">开启后 AI 边生成边显示第一条，网络慢时体感提升明显。</p>
+        <p class="tip" data-i18n="开启后 AI 边生成边显示第一条，网络慢时体感提升明显。">开启后 AI 边生成边显示第一条，网络慢时体感提升明显。</p>
 
         <div class="row">
-          <label class="lb">代理模式</label>
+          <label class="lb" data-i18n="代理模式">代理模式</label>
           <select id="proxyMode" class="in">
-            <option value="auto">使用浏览器原有代理设置（推荐，释放扩展控制）</option>
-            <option value="custom">固定代理 + AI 域名直连（替换浏览器代理规则）</option>
-            <option value="direct">全局直连（会关掉整个浏览器的代理）</option>
+            <option value="auto" data-i18n="使用浏览器原有代理设置（推荐，释放扩展控制）">使用浏览器原有代理设置（推荐，释放扩展控制）</option>
+            <option value="custom" data-i18n="固定代理 + AI 域名直连（替换浏览器代理规则）">固定代理 + AI 域名直连（替换浏览器代理规则）</option>
+            <option value="direct" data-i18n="全局直连（会关掉整个浏览器的代理）">全局直连（会关掉整个浏览器的代理）</option>
           </select>
         </div>
 
-        <p class="tip tip--danger" id="directWarn" style="display:none">
-          🚨 <b>「全局直连」会影响整个浏览器，不只是本扩展。</b><br>
-          一旦应用，你<b>所有标签页</b>的流量都不再走代理 —— 正在看的其他网站也可能打不开。<br>
-          若要保留其他站点的代理，需要核对并使用上面的固定代理模式。
-          固定代理也会替换浏览器现有的 PAC、分流与绕过规则。
-        </p>
+        <p class="tip tip--danger" id="directWarn" style="display:none" data-i18n="🚨 「全局直连」会影响整个浏览器，不只是本扩展。 一旦应用，你所有标签页的流量都不再走代理 —— 正在看的其他网站也可能打不开。 若要保留其他站点的代理，需要核对并使用上面的固定代理模式。 固定代理也会替换浏览器现有的 PAC、分流与绕过规则。">🚨 「全局直连」会影响整个浏览器，不只是本扩展。 一旦应用，你所有标签页的流量都不再走代理 —— 正在看的其他网站也可能打不开。 若要保留其他站点的代理，需要核对并使用上面的固定代理模式。 固定代理也会替换浏览器现有的 PAC、分流与绕过规则。</p>
 
         <div id="proxyCustom" style="display:none">
           <div class="row2">
             <div class="row">
-              <label class="lb">代理类型</label>
+              <label class="lb" data-i18n="代理类型">代理类型</label>
               <select id="proxyScheme" class="in">
                 <option value="http">HTTP</option>
                 <option value="socks5">SOCKS5</option>
@@ -142,136 +139,125 @@
               </select>
             </div>
             <div class="row">
-              <label class="lb">端口</label>
+              <label class="lb" data-i18n="端口">端口</label>
               <input id="proxyPort" class="in" type="number" min="1" max="65535" placeholder="7890" />
             </div>
           </div>
           <div class="row">
-            <label class="lb">代理主机</label>
+            <label class="lb" data-i18n="代理主机">代理主机</label>
             <input id="proxyHost" class="in" type="text" spellcheck="false" placeholder="127.0.0.1" />
           </div>
-          <p class="tip">
-            填你<b>原本在用的</b>代理地址（Clash / v2ray 本地端口，常见 7890 / 1080）。<br>
-            应用后：<b>AI 接口域名直连，其余网站全部走这个固定代理</b>。<br>
-            此设置会替换整个浏览器的现有 PAC、分流及绕过规则，请确认它适合所有标签页。
-          </p>
+          <p class="tip" data-i18n="填你原本在用的代理地址（Clash / v2ray 本地端口，常见 7890 / 1080）。 应用后：AI 接口域名直连，其余网站全部走这个固定代理。 此设置会替换整个浏览器的现有 PAC、分流及绕过规则，请确认它适合所有标签页。">填你原本在用的代理地址（Clash / v2ray 本地端口，常见 7890 / 1080）。 应用后：AI 接口域名直连，其余网站全部走这个固定代理。 此设置会替换整个浏览器的现有 PAC、分流及绕过规则，请确认它适合所有标签页。</p>
         </div>
 
-        <p class="tip tip--info">
-          技术限制：浏览器 <code>fetch</code> 无法给单个请求指定代理，只能通过 <code>chrome.proxy</code> 改规则。
-          代理字段仅作草稿，点「应用代理设置」并确认后才保存及生效；普通保存、测试和测速不会应用草稿。
-          点下方「恢复默认」可释放扩展的代理控制，回到浏览器原有设置。
-        </p>
+        <p class="tip tip--info" data-i18n="技术限制：浏览器 fetch 无法给单个请求指定代理，只能通过 chrome.proxy 改规则。 代理字段仅作草稿，点「应用代理设置」并确认后才保存及生效；普通保存、测试和测速不会应用草稿。 点下方「恢复默认」可释放扩展的代理控制，回到浏览器原有设置。">技术限制：浏览器 fetch 无法给单个请求指定代理，只能通过 chrome.proxy 改规则。 代理字段仅作草稿，点「应用代理设置」并确认后才保存及生效；普通保存、测试和测速不会应用草稿。 点下方「恢复默认」可释放扩展的代理控制，回到浏览器原有设置。</p>
 
         <div class="row">
-          <label class="lb">当前生效状态</label>
-          <div class="test-out" id="proxyState">检测中…</div>
+          <label class="lb" data-i18n="当前生效状态">当前生效状态</label>
+          <div class="test-out" id="proxyState" data-i18n="检测中…">检测中…</div>
         </div>
 
         <div class="act">
-          <button class="btn btn--ghost2" id="proxyApply" type="button">应用代理设置</button>
-          <button class="btn btn--ghost2" id="proxyDiag" type="button">测速对比</button>
-          <button class="btn btn--ghost2" id="proxyClear" type="button">恢复默认</button>
+          <button class="btn btn--ghost2" id="proxyApply" type="button" data-i18n="应用代理设置">应用代理设置</button>
+          <button class="btn btn--ghost2" id="proxyDiag" type="button" data-i18n="测速对比">测速对比</button>
+          <button class="btn btn--ghost2" id="proxyClear" type="button" data-i18n="恢复默认">恢复默认</button>
         </div>
         <div id="diagOut" class="diag" style="display:none"></div>
       </section>
 
       <!-- ========== 生成偏好 ========== -->
       <section class="card">
-        <h2 class="card__t">3 · 生成偏好（面板里的默认值）</h2>
+        <h2 class="card__t" data-i18n="3 · 生成偏好（面板里的默认值）">3 · 生成偏好（面板里的默认值）</h2>
 
         <div class="row">
-          <label class="lb">默认风格</label>
+          <label class="lb" data-i18n="默认风格">默认风格</label>
           <select id="style" class="in"></select>
         </div>
         <p class="tip" id="styleTip"></p>
 
         <div class="row2">
           <div class="row">
-            <label class="lb">默认条数</label>
+            <label class="lb" data-i18n="默认条数">默认条数</label>
             <select id="count" class="in">
               <option>1</option><option>2</option><option>3</option>
               <option>4</option><option>5</option>
             </select>
           </div>
           <div class="row">
-            <label class="lb">输出语言</label>
+            <label class="lb" data-i18n="输出语言">输出语言</label>
             <select id="lang" class="in"></select>
           </div>
         </div>
 
         <div class="row">
-          <label class="lb">长度倾向</label>
+          <label class="lb" data-i18n="长度倾向">长度倾向</label>
           <select id="length" class="in"></select>
         </div>
       </section>
 
       <!-- ========== 提示词 ========== -->
       <section class="card" id="promptCard">
-        <h2 class="card__t">4 · 提示词（完全可自定义）</h2>
-        <p class="card__hint">
-          留空即使用内置模板（推荐）。填入模板后，用
-          <code>{{变量}}</code> 占位，生成时会自动替换为真实内容。
-        </p>
+        <h2 class="card__t" data-i18n="4 · 提示词（完全可自定义）">4 · 提示词（完全可自定义）</h2>
+        <p class="card__hint" data-i18n="留空即使用内置模板（推荐）。填入模板后，用 {{变量}} 占位，生成时会自动替换为真实内容。">留空即使用内置模板（推荐）。填入模板后，用 {{变量}} 占位，生成时会自动替换为真实内容。</p>
 
         <div class="row">
-          <label class="lb">输出格式约束</label>
+          <label class="lb" data-i18n="输出格式约束">输出格式约束</label>
           <select id="promptFormat" class="in">
-            <option value="json">严格 JSON 数组（最稳，推荐）</option>
-            <option value="plain">自由文本（自定义风格时更灵活）</option>
+            <option value="json" data-i18n="严格 JSON 数组（最稳，推荐）">严格 JSON 数组（最稳，推荐）</option>
+            <option value="plain" data-i18n="自由文本（自定义风格时更灵活）">自由文本（自定义风格时更灵活）</option>
           </select>
         </div>
-        <p class="tip">选「自由文本」时会在末尾追加序号格式要求，模型输出用编号列表，再由扩展解析成多条。</p>
+        <p class="tip" data-i18n="选「自由文本」时会在末尾追加序号格式要求，模型输出用编号列表，再由扩展解析成多条。">选「自由文本」时会在末尾追加序号格式要求，模型输出用编号列表，再由扩展解析成多条。</p>
 
         <div class="row">
-          <label class="lb">人设 / 背景（可选）</label>
-          <textarea id="persona" class="in" rows="2" placeholder="例如：我是一名后端工程师，说话直接、不爱客套"></textarea>
+          <label class="lb" data-i18n="人设 / 背景（可选）">人设 / 背景（可选）</label>
+          <textarea id="persona" class="in" rows="2" placeholder="例如：我是一名后端工程师，说话直接、不爱客套" data-i18n-placeholder="例如：我是一名后端工程师，说话直接、不爱客套"></textarea>
         </div>
-        <p class="tip">插在 system prompt 最前面，用来长期定义 AI 的身份与语气。</p>
+        <p class="tip" data-i18n="插在 system prompt 最前面，用来长期定义 AI 的身份与语气。">插在 system prompt 最前面，用来长期定义 AI 的身份与语气。</p>
 
         <div class="row">
-          <label class="lb">全局补充要求</label>
-          <textarea id="customInstruction" class="in" rows="2" placeholder="例如：不要用 emoji；语气像我本人，偏毒舌；避免提到工作"></textarea>
+          <label class="lb" data-i18n="全局补充要求">全局补充要求</label>
+          <textarea id="customInstruction" class="in" rows="2" placeholder="例如：不要用 emoji；语气像我本人，偏毒舌；避免提到工作" data-i18n-placeholder="例如：不要用 emoji；语气像我本人，偏毒舌；避免提到工作"></textarea>
         </div>
-        <p class="tip">会替换模板里的 <code>{{customInstruction}}</code> 变量，每次生成都带上。</p>
+        <p class="tip" data-i18n="会替换模板里的 {{customInstruction}} 变量，每次生成都带上。">会替换模板里的 {{customInstruction}} 变量，每次生成都带上。</p>
 
         <!-- 变量表 -->
         <div class="varbox">
-          <div class="varbox__t">可用变量 <span class="varbox__hint">点一下插入到编辑框</span></div>
+          <div class="varbox__t"><span data-i18n="可用变量">可用变量</span> <span class="varbox__hint" data-i18n="点一下插入到编辑框">点一下插入到编辑框</span></div>
           <div class="varbox__list" id="varList"></div>
         </div>
 
         <div class="row">
           <label class="lb">
-            System 提示词
-            <button class="lnk" id="viewDefaultSys" type="button">查看默认</button>
-            <button class="lnk" id="clearSys" type="button">清空</button>
+            <span data-i18n="System 提示词">System 提示词</span>
+            <button class="lnk" id="viewDefaultSys" type="button" data-i18n="查看默认">查看默认</button>
+            <button class="lnk" id="clearSys" type="button" data-i18n="清空">清空</button>
           </label>
           <textarea id="systemPrompt" class="in mono" rows="10" spellcheck="false"
-            placeholder="留空 = 使用内置默认模板"></textarea>
+            placeholder="留空 = 使用内置默认模板" data-i18n-placeholder="留空 = 使用内置默认模板"></textarea>
         </div>
 
         <div class="row">
           <label class="lb">
-            User 提示词模板
-            <button class="lnk" id="viewDefaultUser" type="button">查看默认</button>
-            <button class="lnk" id="clearUser" type="button">清空</button>
+            <span data-i18n="User 提示词模板">User 提示词模板</span>
+            <button class="lnk" id="viewDefaultUser" type="button" data-i18n="查看默认">查看默认</button>
+            <button class="lnk" id="clearUser" type="button" data-i18n="清空">清空</button>
           </label>
           <textarea id="userPrompt" class="in mono" rows="8" spellcheck="false"
-            placeholder="留空 = 使用内置默认模板"></textarea>
+            placeholder="留空 = 使用内置默认模板" data-i18n-placeholder="留空 = 使用内置默认模板"></textarea>
         </div>
 
         <p class="tip tip--warn" style="display:none" id="varWarn"></p>
 
         <div class="act">
-          <button class="btn btn--pri" id="preview" type="button">预览渲染结果</button>
-          <button class="btn btn--ghost2" id="copyPrompt" type="button">复制完整提示词</button>
+          <button class="btn btn--pri" id="preview" type="button" data-i18n="预览渲染结果">预览渲染结果</button>
+          <button class="btn btn--ghost2" id="copyPrompt" type="button" data-i18n="复制完整提示词">复制完整提示词</button>
         </div>
 
         <div class="preview" id="previewBox" style="display:none">
           <div class="preview__hd">
-            <span>渲染结果预览（用示例推文）</span>
-            <button class="lnk" id="closePreview" type="button">关闭</button>
+            <span data-i18n="渲染结果预览（用示例推文）">渲染结果预览（用示例推文）</span>
+            <button class="lnk" id="closePreview" type="button" data-i18n="关闭">关闭</button>
           </div>
           <div class="preview__b">
             <div class="preview__lb">system</div>
@@ -286,28 +272,29 @@
 
       <!-- ========== 行为 ========== -->
       <section class="card">
-        <h2 class="card__t">5 · 交互行为</h2>
-        <label class="cb"><input type="checkbox" id="autoGenerate" /><span>打开回复面板时自动生成回复（点「回复」气泡或悬浮 ✦ 按钮后立即请求 AI，取消则手动点「生成回复」）</span></label>
-        <label class="cb"><input type="checkbox" id="showFloatingButton" /><span>时间线上显示「✦ AI 回复」悬浮按钮</span></label>
-        <label class="cb"><input type="checkbox" id="autoInsertFirst" /><span>生成完成后自动回填第 1 条</span></label>
-        <label class="cb"><input type="checkbox" id="debug" /><span>开启调试日志（Console）</span></label>
+        <h2 class="card__t" data-i18n="5 · 交互行为">5 · 交互行为</h2>
+        <label class="cb"><input type="checkbox" id="autoGenerate" /><span data-i18n="打开回复面板时自动生成回复（点「回复」气泡或悬浮 ✦ 按钮后立即请求 AI，取消则手动点「生成回复」）">打开回复面板时自动生成回复（点「回复」气泡或悬浮 ✦ 按钮后立即请求 AI，取消则手动点「生成回复」）</span></label>
+        <label class="cb"><input type="checkbox" id="showFloatingButton" /><span data-i18n="时间线上显示「✦ AI 回复」悬浮按钮">时间线上显示「✦ AI 回复」悬浮按钮</span></label>
+        <label class="cb"><input type="checkbox" id="autoInsertFirst" /><span data-i18n="生成完成后自动回填第 1 条">生成完成后自动回填第 1 条</span></label>
+        <label class="cb"><input type="checkbox" id="debug" /><span data-i18n="开启调试日志（Console）">开启调试日志（Console）</span></label>
       </section>
 
       <section class="card card--danger">
-        <h2 class="card__t">危险操作</h2>
-        <button class="btn btn--danger" id="reset" type="button">恢复默认设置</button>
+        <h2 class="card__t" data-i18n="危险操作">危险操作</h2>
+        <button class="btn btn--danger" id="reset" type="button" data-i18n="恢复默认设置">恢复默认设置</button>
         <span class="test-out" id="resetOut"></span>
       </section>
     </main>
 
     <footer class="ft">
-      <span id="saveState">普通设置自动保存；代理设置需单独应用</span>
-      <button class="btn btn--pri btn--sm" id="save" type="button">保存</button>
+      <span id="saveState" data-i18n="普通设置自动保存；代理设置需单独应用">普通设置自动保存；代理设置需单独应用</span>
+      <button class="btn btn--pri btn--sm" id="save" type="button" data-i18n="保存">保存</button>
     </footer>
   </div>
 
   <script src="../shared/config.js"></script>
   <script src="../shared/utils.js"></script>
+  <script src="../shared/i18n.js"></script>
   <script src="../shared/prompt.js"></script>
   <script src="../shared/proxy.js"></script>
   <script src="options.js"></script>

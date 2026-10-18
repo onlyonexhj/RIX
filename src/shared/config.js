@@ -53,7 +53,8 @@
     autoGenerate: true,
     count: 3,
     style: 'auto',
-    lang: 'auto', // auto | zh | en | ja | ko
+    lang: 'auto', // auto | zh | en | ja | vi | ko
+    uiLang: 'auto', // 界面语言独立于回复语言；auto 跟随浏览器
     length: 'medium', // short | medium | long
     customInstruction: '',
 
@@ -213,6 +214,7 @@
     { id: 'zh', label: '中文' },
     { id: 'en', label: 'English' },
     { id: 'ja', label: '日本語' },
+    { id: 'vi', label: 'Tiếng Việt' },
     { id: 'ko', label: '한국어' },
   ];
 

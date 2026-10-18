@@ -21,7 +21,7 @@ def check(name, condition):
 async def main():
     async with async_playwright() as p:
         ctx = await p.chromium.launch_persistent_context(
-            '', headless=True, channel='chromium',
+            '', headless=True, channel='chromium', locale='zh-CN',
             args=['--headless=new', '--disable-extensions-except=' + str(ROOT),
                   '--load-extension=' + str(ROOT), '--no-sandbox'])
         try:
