@@ -6,9 +6,9 @@ X(Twitter) 타임라인에서 **답글 아이콘**을 눌러 작성 대화상자
 
 서버가 필요 없는 순수 프런트엔드 Chrome 확장 프로그램(Manifest V3)입니다. API Key는 로컬 `chrome.storage.local`에만 저장되며, 요청은 브라우저에서 선택한 모델 제공업체로 직접 전송됩니다.
 
-![패널 미리보기](dev/preview-panel.png)
+![패널 미리보기](dev/screenshots/ko/panel.png)
 
-스크린샷은 화면 예시입니다. 실제 화면은 아래의 다섯 언어로 전환할 수 있습니다.
+아래 스크린샷은 이 README와 같은 언어의 화면을 사용하며, 예시 데이터는 데모용입니다. 화면은 여전히 아래의 다섯 언어로 전환할 수 있습니다.
 
 ---
 
@@ -67,7 +67,7 @@ X(Twitter) 타임라인에서 **답글 아이콘**을 눌러 작성 대화상자
 
 브라우저가 기존 설정을 유지할 수 있는 고정 프록시 규칙을 사용 중일 때만 안전하게 직접 연결을 비교할 수 있습니다. 시스템 프록시, PAC, 다른 확장 프로그램이 제어하는 프록시는 현재 네트워크만 측정하고 직접 연결 비교를 건너뛴 이유를 명확히 표시합니다.
 
-![네트워크 설정 카드](dev/preview-net-card.png)
+![네트워크 설정 카드](dev/screenshots/ko/network.png)
 
 ### 3. 프록시 모드 선택
 
@@ -179,7 +179,7 @@ User:
 
 > 미리보기와 실제 전송은 동일한 `src/shared/prompt.js` 로직을 사용하므로, 표시된 내용이 그대로 사용됩니다.
 
-![프롬프트 카드](dev/preview-prompt-card.png)
+![프롬프트 카드](dev/screenshots/ko/prompts.png)
 
 ---
 
@@ -295,6 +295,9 @@ python tools/preview.py
 
 # 설정 페이지(프롬프트 편집기 포함) 미리보기 이미지를 dev/에 렌더링
 python tools/preview-options.py
+
+# 다섯 언어의 README용 스크린샷 생성
+python tools/preview-readmes.py
 
 # 아이콘 다시 생성(표준 라이브러리만 사용, PIL 불필요)
 python tools/make_icons.py

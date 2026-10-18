@@ -6,9 +6,9 @@ Click **Reply** on a post in your X (Twitter) timeline to open the reply dialog.
 
 This is a client-side Chrome extension built with Manifest V3. No separate application server is required. Your API key is stored locally in `chrome.storage.local`, and your browser sends requests directly to the model provider you select.
 
-![Panel preview](dev/preview-panel.png)
+![Panel preview](dev/screenshots/en/panel.png)
 
-Screenshots are examples. The actual interface supports all five languages listed below.
+The screenshots below use this README's interface language, with sample data for demonstration only. The interface can still be switched between all five languages listed below.
 
 ---
 
@@ -68,7 +68,7 @@ Lower latency is faster. When a safe comparison is possible, the check preserves
 
 The direct comparison runs only when the current fixed proxy rules can be preserved safely. With system proxies, PAC, or proxy settings controlled by another extension, only the current route is tested and the reason for skipping the direct comparison is shown.
 
-![Network settings card](dev/preview-net-card.png)
+![Network settings card](dev/screenshots/en/network.png)
 
 ### 3. Choose a proxy mode
 
@@ -176,7 +176,7 @@ Preview a changed template before saving to inspect what will be sent to the mod
 
 > Preview and generation share the same implementation in `src/shared/prompt.js`.
 
-![Prompt settings card](dev/preview-prompt-card.png)
+![Prompt settings card](dev/screenshots/en/prompts.png)
 
 ---
 
@@ -286,6 +286,9 @@ node tools/check-pages.js
 # Render the panel and settings previews into dev/
 python tools/preview.py
 python tools/preview-options.py
+
+# Generate README screenshots in all five languages
+python tools/preview-readmes.py
 
 # Regenerate icons; Python standard library only
 python tools/make_icons.py

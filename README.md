@@ -6,9 +6,9 @@
 
 纯前端 Chrome 扩展（Manifest V3），无需服务器；API Key 只存在本地 `chrome.storage.local`，请求由浏览器直接发往你选定的模型服务商。
 
-![面板预览](dev/preview-panel.png)
+![面板预览](dev/screenshots/zh/panel.png)
 
-截图仅为界面示例，实际界面可切换下方列出的五种语言。
+下方截图使用本 README 对应的界面语言，示例数据仅供演示；界面仍可切换下方列出的五种语言。
 
 ---
 
@@ -67,7 +67,7 @@
 
 仅当前浏览器使用可保留的固定代理规则时，才能安全进行直连对比。系统代理、PAC 或其他扩展控制的代理会只测当前网络，并明确显示跳过直连对比的原因。
 
-![网络设置卡片](dev/preview-net-card.png)
+![网络设置卡片](dev/screenshots/zh/network.png)
 
 ### 3. 代理模式怎么选
 
@@ -179,7 +179,7 @@ User:
 
 > 预览与实际发送共用 `src/shared/prompt.js` 同一份逻辑，所见即所得。
 
-![提示词卡片](dev/preview-prompt-card.png)
+![提示词卡片](dev/screenshots/zh/prompts.png)
 
 ---
 
@@ -295,6 +295,9 @@ python tools/preview.py
 
 # 渲染设置页（含提示词编辑器）预览图到 dev/
 python tools/preview-options.py
+
+# 生成五种语言的 README 截图
+python tools/preview-readmes.py
 
 # 重新生成图标（纯标准库，无需 PIL）
 python tools/make_icons.py

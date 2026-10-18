@@ -6,9 +6,9 @@ Khi bạn nhấp vào **biểu tượng trả lời** của một bài đăng tr
 
 Đây là tiện ích Chrome hoàn toàn phía trình duyệt (Manifest V3), không cần máy chủ riêng. API Key chỉ được lưu cục bộ trong `chrome.storage.local`; trình duyệt gửi yêu cầu trực tiếp đến nhà cung cấp mô hình do bạn chọn.
 
-![Xem trước bảng gợi ý](dev/preview-panel.png)
+![Xem trước bảng gợi ý](dev/screenshots/vi/panel.png)
 
-Ảnh chụp chỉ minh họa giao diện. Giao diện thực tế có thể chuyển đổi giữa năm ngôn ngữ được liệt kê bên dưới.
+Các ảnh chụp bên dưới sử dụng ngôn ngữ giao diện tương ứng với README này; dữ liệu mẫu chỉ dùng để minh họa. Bạn vẫn có thể chuyển giao diện giữa năm ngôn ngữ được liệt kê bên dưới.
 
 ---
 
@@ -67,7 +67,7 @@ Số nhỏ hơn nghĩa là nhanh hơn. Phép đo giữ nguyên máy chủ proxy 
 
 Chỉ có thể so sánh kết nối trực tiếp một cách an toàn khi trình duyệt đang dùng quy tắc proxy cố định mà tiện ích có thể giữ nguyên. Với proxy hệ thống, PAC hoặc proxy do tiện ích khác điều khiển, chỉ mạng hiện tại được đo; lý do bỏ qua phép so sánh trực tiếp sẽ được hiển thị rõ.
 
-![Thẻ cài đặt mạng](dev/preview-net-card.png)
+![Thẻ cài đặt mạng](dev/screenshots/vi/network.png)
 
 ### 3. Chọn chế độ proxy
 
@@ -179,7 +179,7 @@ Sau khi sửa mẫu, hãy xem trước rồi lưu để biết chính xác nội
 
 > Phần xem trước và phần gửi thực tế dùng chung logic trong `src/shared/prompt.js`, nên nội dung hiển thị phản ánh nội dung sẽ gửi.
 
-![Thẻ cấu hình prompt](dev/preview-prompt-card.png)
+![Thẻ cấu hình prompt](dev/screenshots/vi/prompts.png)
 
 ---
 
@@ -295,6 +295,9 @@ python tools/preview.py
 
 # Kết xuất ảnh xem trước trang cài đặt, gồm trình sửa prompt, vào dev/
 python tools/preview-options.py
+
+# Tạo ảnh chụp cho README bằng cả năm ngôn ngữ
+python tools/preview-readmes.py
 
 # Tạo lại biểu tượng (chỉ dùng thư viện chuẩn, không cần PIL)
 python tools/make_icons.py

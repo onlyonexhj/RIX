@@ -6,9 +6,9 @@ X（Twitter）のタイムラインで**返信ボタン**を押して投稿ダ�
 
 サーバー不要の Chrome 拡張機能（Manifest V3）です。API Key はローカルの `chrome.storage.local` にのみ保存され、リクエストはブラウザーから選択したモデルのサービス提供元へ直接送信されます。
 
-![パネルのプレビュー](dev/preview-panel.png)
+![パネルのプレビュー](dev/screenshots/ja/panel.png)
 
-スクリーンショットは表示例です。実際の画面は、以下の 5 言語に切り替えられます。
+以下のスクリーンショットは、この README と同じ言語の画面を使用しています。サンプルデータはデモ用です。画面は引き続き、以下の 5 言語に切り替えられます。
 
 ---
 
@@ -67,7 +67,7 @@ X（Twitter）のタイムラインで**返信ボタン**を押して投稿ダ�
 
 直接接続との比較を安全に行えるのは、現在のブラウザーが、設定を維持できる固定プロキシルールを使用している場合に限られます。システムプロキシ、PAC、別の拡張機能が管理するプロキシの場合は、現在のネットワークだけを測定し、直接接続の比較をスキップした理由を表示します。
 
-![ネットワーク設定カード](dev/preview-net-card.png)
+![ネットワーク設定カード](dev/screenshots/ja/network.png)
 
 ### 3. プロキシモードの選び方
 
@@ -179,7 +179,7 @@ User:
 
 > プレビューと実際の送信は、どちらも `src/shared/prompt.js` の同じ処理を使っています。
 
-![プロンプト設定カード](dev/preview-prompt-card.png)
+![プロンプト設定カード](dev/screenshots/ja/prompts.png)
 
 ---
 
@@ -295,6 +295,9 @@ python tools/preview.py
 
 # 設定ページ（プロンプトエディターを含む）のプレビュー画像を dev/ に出力
 python tools/preview-options.py
+
+# 5 言語の README 用スクリーンショットを生成
+python tools/preview-readmes.py
 
 # アイコンを再生成（標準ライブラリのみ。PIL は不要）
 python tools/make_icons.py
