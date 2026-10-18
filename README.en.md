@@ -57,7 +57,7 @@ Waiting time depends on the model and network. The status bar shows first-respon
 
 ### 2. Compare network paths before changing proxy settings
 
-In **2 · Network and proxy**, select **Compare latency**. It checks:
+In **2 · Network and proxy**, select **Compare connection speed**. It checks:
 
 | Check | Meaning |
 |---|---|
@@ -105,7 +105,7 @@ The settings page opens automatically after the first installation.
 ### Configuration
 
 1. Select the extension icon, then **All settings**.
-2. Choose a provider under **Quick preset**, such as Zhipu GLM. The base URL and model name are filled in automatically.
+2. Choose a provider under **Quick presets**, such as Zhipu GLM. The base URL and model name are filled in automatically.
 3. Enter your **API key**.
 4. Select **Test connection**. A sample response confirms that the configuration works.
 5. Close settings and select Reply on a post in X.
@@ -146,7 +146,7 @@ Select a variable chip in settings to insert it at the cursor. Unknown variable 
 ### Output format
 
 - **Strict JSON array:** the default and most reliable option. The extension uses balanced-bracket scanning and fallback parsing.
-- **Plain text:** asks the model for numbered entries such as `1. 2. 3.`; useful for custom styles.
+- **Free text:** asks the model for numbered entries such as `1. 2. 3.`; useful for custom styles.
 
 ### Example: concrete information without emotional language
 
@@ -166,11 +166,11 @@ Here is a post:
 Write {{count}} replies. Each reply must contain a specific point or fact.
 ```
 
-This example also works with **Output format = Plain text**.
+This example also works with **Output format = Free text**.
 
 ### Live preview
 
-Select **Preview rendered prompts** to render the complete prompts using a sample post. System and user messages are displayed separately. **No model request is made, so the preview does not use API credits.**
+Select **Preview prompt** to render the complete prompts using a sample post. System and user messages are displayed separately. **No model request is made, so the preview does not use API credits.**
 
 Preview a changed template before saving to inspect what will be sent to the model.
 
@@ -320,7 +320,7 @@ X may have changed its DOM. Enable Debug logging, inspect the selectors, and upd
 
 **Generation is slow.**
 
-Keep streaming enabled so complete suggestions can appear sooner, and inspect first-response latency in the status bar. Use Compare latency to check network paths. A reasoning model may spend time thinking before returning visible text; use Disable deep thinking where the provider supports it, or select another model as appropriate.
+Keep streaming enabled so complete suggestions can appear sooner, and inspect first-response latency in the status bar. Use Compare connection speed to check network paths. A reasoning model may spend time thinking before returning visible text; use Disable deep thinking where the provider supports it, or select another model as appropriate.
 
 **Must I configure a proxy in the extension?**
 

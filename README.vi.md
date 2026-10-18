@@ -22,12 +22,12 @@ Khi bạn nhấp vào **biểu tượng trả lời** của một bài đăng tr
 | **Tùy chỉnh prompt** | **Tùy chỉnh hoàn toàn mẫu system / user, nội suy 15 `{{biến}}` và xem trước ngay** |
 | **Truyền trực tuyến** | **Hiển thị từng gợi ý ngay khi gợi ý đó hoàn chỉnh, không cần chờ tạo xong tất cả; tốc độ thực tế phụ thuộc mô hình và mạng** |
 | **Kéo thả bảng gợi ý** | Giữ thanh tiêu đề để kéo; vị trí được cố định sau khi thả; nhấp đúp để đặt lại |
-| Tự động + 8 phong cách | Tự chọn giọng điệu, hoặc chọn hài hước / chuyên nghiệp / sắc sảo / đồng cảm / tranh luận / trừu tượng / dịch và chỉnh văn / châm biếm |
+| Tự động + 8 phong cách | Tự chọn giọng điệu, hoặc chọn hài hước / chuyên nghiệp / sắc sảo / đồng cảm / trái chiều / Meme / dịch và trau chuốt / châm biếm |
 | Điền bằng một lần nhấp | Nhấp gợi ý để điền vào trình soạn thảo Draft.js; **bộ đếm ký tự và nút đăng vẫn cập nhật bình thường** |
 | Theo dõi yêu cầu lâu | Hiển thị thời gian đã chạy và độ trễ đến nội dung đầu tiên; có thanh tiến trình sau 30 giây; có thể «Dừng» bất cứ lúc nào |
 | Thử lại khi lỗi | Khi xảy ra lỗi, nút chuyển thành «↻ Thử lại» và vẫn dùng được, không bị kẹt ở trạng thái vô hiệu hóa |
 | Không che hộp thoại | Ưu tiên đặt bảng gợi ý bên trái hộp thoại để bạn vẫn thấy ô soạn thảo và nút đăng |
-| Nút nổi trên dòng thời gian | Rê chuột lên bài đăng để hiện «✦ AI trả lời», dùng được cả khi chưa nhấp biểu tượng trả lời |
+| Nút nổi trên dòng thời gian | Rê chuột lên bài đăng để hiện «✦ Trả lời bằng AI», dùng được cả khi chưa nhấp biểu tượng trả lời |
 | Nhiều nhà cung cấp | Zhipu GLM / DeepSeek / OpenAI / Claude / Kimi / OpenRouter / tùy chỉnh (Ollama, vLLM, v.v.) |
 | Giao diện đa ngôn ngữ | 中文 / English / 日本語 / Tiếng Việt / 한국어; theo ngôn ngữ trình duyệt hoặc chọn thủ công |
 
@@ -35,7 +35,7 @@ Khi bạn nhấp vào **biểu tượng trả lời** của một bài đăng tr
 
 Bạn có thể chọn «Ngôn ngữ giao diện» trong bảng trả lời, cửa sổ bật lên của tiện ích và trang toàn bộ cài đặt. Mặc định, tiện ích dùng ngôn ngữ trình duyệt; bạn cũng có thể chọn thủ công tiếng Trung, tiếng Anh, tiếng Nhật, tiếng Việt hoặc tiếng Hàn. Thay đổi có hiệu lực ngay và được lưu cục bộ.
 
-«Ngôn ngữ đầu ra» quyết định riêng ngôn ngữ AI dùng để trả lời, hỗ trợ năm ngôn ngữ trên và tùy chọn «Theo bài gốc». Đổi ngôn ngữ giao diện không làm thay đổi ngôn ngữ trả lời, các gợi ý đã tạo, nội dung đang soạn hoặc prompt tùy chỉnh.
+«Ngôn ngữ trả lời» quyết định riêng ngôn ngữ AI dùng để trả lời, hỗ trợ năm ngôn ngữ trên và tùy chọn «Theo bài gốc». Đổi ngôn ngữ giao diện không làm thay đổi ngôn ngữ trả lời, các gợi ý đã tạo, nội dung đang soạn hoặc prompt tùy chỉnh.
 
 ### Phím tắt
 
@@ -56,7 +56,7 @@ Thời gian chờ thực tế phụ thuộc mô hình và mạng. Thanh trạng 
 
 ### 2. So sánh tốc độ trước khi quyết định đổi proxy
 
-Trong trang cài đặt, mở **2 · Mạng và proxy** → nhấp **«So sánh tốc độ»**. Tiện ích sẽ đo riêng:
+Trong trang cài đặt, mở **2 · Mạng và proxy** → nhấp **«So sánh tốc độ kết nối»**. Tiện ích sẽ đo riêng:
 
 | Phép đo | Ý nghĩa |
 |---|---|
@@ -90,7 +90,7 @@ Chỉ có thể so sánh kết nối trực tiếp một cách an toàn khi trì
 ## Thao tác với bảng gợi ý
 
 - **Kéo:** Giữ thanh tiêu đề có biểu tượng `⠿` để kéo. Sau khi kéo, bảng sẽ **cố định tại vị trí bạn đặt**, không còn tự di chuyển theo hộp thoại.
-- **Đặt lại:** Nhấp đúp thanh tiêu đề hoặc nhấp nút «Đặt lại» ở bên phải thanh tiêu đề.
+- **Đặt lại vị trí:** Nhấp đúp thanh tiêu đề hoặc nhấp nút «Đặt lại vị trí» ở bên phải thanh tiêu đề.
 - Khi đóng hộp thoại soạn trả lời rồi mở một hộp thoại mới, bảng sẽ lại tự đặt cạnh hộp thoại.
 
 ---
@@ -129,7 +129,7 @@ Mục **4 · Prompt** trong trang cài đặt có ba lớp tùy chỉnh. **Để
 
 | Lớp | Vai trò |
 |---|---|
-| **Vai trò / Bối cảnh** | Được chèn vào đầu system prompt để xác định lâu dài vai trò và giọng điệu của AI |
+| **Vai trò / bối cảnh** | Được chèn vào đầu system prompt để xác định lâu dài vai trò và giọng điệu của AI |
 | **Yêu cầu bổ sung chung** | Thay thế `{{customInstruction}}` trong mẫu, được gửi trong mỗi lần tạo |
 | **Mẫu System / User** | Tùy chỉnh toàn bộ prompt, dùng `{{biến}}` làm chỗ điền |
 
@@ -143,12 +143,12 @@ Nhấp vào nhãn biến trong trang cài đặt để chèn tại vị trí con
 | `tweet.author` | Tên hiển thị của tác giả | `style` | Mô tả phong cách, gồm hướng dẫn chi tiết |
 | `tweet.handle` | Handle của tác giả | `styleName` | Tên phong cách, ví dụ «Hài hước» |
 | `tweet.time` | Thời gian đăng | `length` | Mô tả độ dài |
-| `tweet.media` | Loại nội dung đa phương tiện | `lang` | Ngôn ngữ đầu ra |
+| `tweet.media` | Loại nội dung đa phương tiện | `lang` | Ngôn ngữ trả lời |
 | `tweet.url` | Liên kết bài đăng | `customInstruction` | Yêu cầu bổ sung |
 | `tweet.text400` | 400 ký tự đầu của bài đăng, dùng cho phong cách tự động | `now` | Thời gian hiện tại lúc tạo |
 | `imageCount` | Số ảnh được gửi đến mô hình | | |
 
-### Ràng buộc định dạng đầu ra
+### Định dạng đầu ra
 
 - **Mảng JSON nghiêm ngặt** (mặc định, ổn định nhất) — Tiện ích phân tích bằng cách quét cân bằng dấu ngoặc, với nhiều phương án dự phòng
 - **Văn bản tự do** — Mô hình đánh số `1. 2. 3.`, linh hoạt hơn khi tùy chỉnh phong cách
@@ -170,7 +170,7 @@ Dưới đây là một bài đăng:
 Hãy viết {{count}} câu trả lời, mỗi câu phải nêu một quan điểm hoặc sự thật cụ thể.
 ```
 
-Ví dụ này phù hợp hơn với «Ràng buộc định dạng đầu ra = Văn bản tự do».
+Ví dụ này phù hợp hơn với «Định dạng đầu ra = Văn bản tự do».
 
 ### Xem trước trực tiếp
 
@@ -327,7 +327,7 @@ python tools/make_icons.py
 Đáp: Bộ chọn có thể không còn phù hợp sau khi X đổi giao diện. Mở Cài đặt → «Bật nhật ký gỡ lỗi» để xem kết quả dò tìm trong Console; có thể bổ sung `data-testid` mới vào `D.SEL` trong `src/content/detector.js`. Các bộ chọn có nhiều phương án dự phòng và khả năng chịu lỗi, nên thông thường không cần sửa.
 
 **Hỏi: Tạo câu trả lời quá chậm?**
-Đáp: Trước hết hãy kiểm tra «Truyền trực tuyến» đã bật chưa (mặc định bật). Các gợi ý đã nhận đầy đủ có thể hiện trước; thanh trạng thái cho biết thời gian đến nội dung đầu tiên, «x.x s». Nếu vẫn chậm, dùng **«So sánh tốc độ»** trong cài đặt để kiểm tra đường mạng. Mô hình suy luận cũng có thể dành thời gian suy nghĩ trước khi xuất nội dung; bạn có thể dùng «Tắt suy nghĩ sâu» nếu nhà cung cấp hỗ trợ, hoặc đổi mô hình theo nhu cầu.
+Đáp: Trước hết hãy kiểm tra «Truyền trực tuyến» đã bật chưa (mặc định bật). Các gợi ý đã nhận đầy đủ có thể hiện trước; thanh trạng thái cho biết thời gian đến nội dung đầu tiên, «x.x s». Nếu vẫn chậm, dùng **«So sánh tốc độ kết nối»** trong cài đặt để kiểm tra đường mạng. Mô hình suy luận cũng có thể dành thời gian suy nghĩ trước khi xuất nội dung; bạn có thể dùng «Tắt suy nghĩ sâu» nếu nhà cung cấp hỗ trợ, hoặc đổi mô hình theo nhu cầu.
 
 **Hỏi: Có bắt buộc cấu hình proxy trong cài đặt không?**
 Đáp: Thường không cần, vì tiện ích mặc định dùng cấu hình mạng sẵn có của trình duyệt. Khi cần điều chỉnh, bạn có thể nhập proxy cố định và chọn **«AI kết nối trực tiếp, các trang khác vẫn qua proxy»**. Chế độ này cho miền AI bỏ qua proxy, còn các trang khác dùng proxy cố định bạn nhập; nó thay thế PAC và quy tắc định tuyến hiện có nên sẽ yêu cầu xác nhận trước khi áp dụng.
@@ -337,19 +337,19 @@ python tools/make_icons.py
 Ngoài ra, tắt tiện ích trong cài đặt, chuyển về chế độ mặc định hoặc khôi phục toàn bộ cài đặt mặc định sẽ gỡ cấu hình proxy ghi đè của tiện ích và khôi phục cấu hình sẵn có của trình duyệt.
 
 **Hỏi: Bảng gợi ý che hộp thoại hoặc tôi muốn đặt ở chỗ khác?**
-Đáp: Giữ thanh tiêu đề có biểu tượng `⠿` và kéo đến vị trí mong muốn. Sau khi kéo, bảng cố định tại đó và không tự di chuyển theo hộp thoại. Nhấp đúp thanh tiêu đề hoặc nhấp «Đặt lại» để khôi phục định vị tự động.
+Đáp: Giữ thanh tiêu đề có biểu tượng `⠿` và kéo đến vị trí mong muốn. Sau khi kéo, bảng cố định tại đó và không tự di chuyển theo hộp thoại. Nhấp đúp thanh tiêu đề hoặc nhấp «Đặt lại vị trí» để khôi phục định vị tự động.
 
 **Hỏi: Nhấp gợi ý nhưng báo «Hộp thoại soạn bài chưa mở»?**
 Đáp: Khi tạo gợi ý từ nút nổi trên dòng thời gian, hộp thoại chưa mở. Hãy nhấp biểu tượng trả lời của chính bài đăng đó để mở hộp thoại, rồi quay lại nhấp gợi ý. Nếu bắt đầu bằng biểu tượng trả lời như bình thường thì sẽ không gặp trường hợp này.
 
 **Hỏi: Sau khi tùy chỉnh mẫu, AI không làm theo hoặc không phân tích được nhiều câu trả lời?**
-Đáp: ① Giữ «Ràng buộc định dạng đầu ra = Mảng JSON nghiêm ngặt»; ② Kiểm tra mẫu không có chỉ dẫn mâu thuẫn như «chỉ xuất một câu trả lời»; ③ Nhấp «Xem trước prompt» để chắc chắn `{{count}}` đã được thay bằng số câu bạn muốn.
+Đáp: ① Giữ «Định dạng đầu ra = Mảng JSON nghiêm ngặt»; ② Kiểm tra mẫu không có chỉ dẫn mâu thuẫn như «chỉ xuất một câu trả lời»; ③ Nhấp «Xem trước prompt» để chắc chắn `{{count}}` đã được thay bằng số câu bạn muốn.
 
 **Hỏi: Điều gì xảy ra nếu viết sai tên biến?**
 Đáp: Trang cài đặt sẽ cảnh báo ngay bằng chữ đỏ. Khi tạo, biến chưa được định nghĩa sẽ được thay bằng **chuỗi rỗng**; nội dung nguyên dạng `{{xxx}}` không được gửi cho mô hình.
 
 **Hỏi: Có thể thêm phong cách cá nhân của tài khoản vào không?**
-Đáp: Có. Dùng trường «Vai trò / Bối cảnh», ví dụ «Tôi là kỹ sư backend, nói thẳng, không thích xã giao, không dùng dấu chấm than». Nội dung đó được chèn vào đầu system prompt trong mỗi lần tạo.
+Đáp: Có. Dùng trường «Vai trò / bối cảnh», ví dụ «Tôi là kỹ sư backend, nói thẳng, không thích xã giao, không dùng dấu chấm than». Nội dung đó được chèn vào đầu system prompt trong mỗi lần tạo.
 
 **Hỏi: Gặp lỗi khi dùng Ollama cục bộ?**
 Đáp: Đặt Base URL thành `http://localhost:11434/v1`, nhấp «Kiểm tra kết nối» trong cài đặt rồi cho phép truy cập địa chỉ đó. Lần đầu kết nối miền tùy chỉnh cũng cần cấp quyền; chỉ nhập địa chỉ không tự cấp quyền truy cập.
