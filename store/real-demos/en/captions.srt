@@ -1,0 +1,31 @@
+﻿1
+00:00:00,000 --> 00:00:03,000
+X AI Reply Assistant · A real screen recording
+
+2
+00:00:03,000 --> 00:00:11,000
+Open the reply dialog for the first post.
+
+3
+00:00:11,000 --> 00:00:19,000
+The panel reads the context, shows style, count and language, and starts generating.
+
+4
+00:00:19,000 --> 00:00:29,000
+The first suggestion fills automatically. Review, then click X’s Reply button to post.
+
+5
+00:00:29,000 --> 00:00:37,000
+Next: a post with quoted content. Its English text is shown in Chinese translation.
+
+6
+00:00:37,000 --> 00:00:45,000
+The wait is shortened in this edit. Review the suggestions when they appear.
+
+7
+00:00:45,000 --> 00:00:55,000
+The user clicks Reply after auto-fill. X again confirms the post was sent.
+
+8
+00:00:55,000 --> 00:01:00,000
+Review your reply. You decide when to post.

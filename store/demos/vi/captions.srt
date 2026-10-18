@@ -1,0 +1,67 @@
+﻿1
+00:00:00,000 --> 00:00:03,000
+Trợ lý trả lời X AI · Từ bài đăng đến câu trả lời
+
+2
+00:00:03,000 --> 00:00:05,300
+Nhấn nút Trả lời bên dưới bài đăng.
+
+3
+00:00:05,300 --> 00:00:08,200
+Bảng đọc ngữ cảnh và lần lượt hiển thị các gợi ý đã hoàn tất.
+
+4
+00:00:08,200 --> 00:00:11,000
+Khi tạo xong, chọn một câu trả lời bạn thích.
+
+5
+00:00:11,000 --> 00:00:13,200
+Nhấn một gợi ý để chèn vào ô trả lời.
+
+6
+00:00:13,200 --> 00:00:18,000
+Bạn có thể sửa tiếp rồi tự quyết định có đăng hay không.
+
+7
+00:00:18,000 --> 00:00:23,000
+Chuyển sang Hài hước để tạo một cách diễn đạt khác.
+
+8
+00:00:23,000 --> 00:00:28,000
+Hoặc chọn Chuyên nghiệp để câu trả lời cụ thể hơn.
+
+9
+00:00:28,000 --> 00:00:31,500
+Điều chỉnh số câu và ngôn ngữ trả lời theo nhu cầu.
+
+10
+00:00:31,500 --> 00:00:33,800
+Tạo 1 câu trả lời bằng tiếng Việt rồi kiểm tra nội dung.
+
+11
+00:00:33,800 --> 00:00:35,000
+Nhấn gợi ý để chèn câu trả lời mới.
+
+12
+00:00:35,000 --> 00:00:38,200
+Bạn có thể dừng bất cứ lúc nào trong khi đang tạo.
+
+13
+00:00:38,200 --> 00:00:41,000
+Khi muốn tiếp tục, nhấn Tạo câu trả lời một lần nữa.
+
+14
+00:00:41,000 --> 00:00:48,000
+Chọn nhà cung cấp trong Cài đặt và nhập API key của bạn.
+
+15
+00:00:48,000 --> 00:00:51,800
+Thiết lập vai trò và prompt để câu trả lời hợp cách viết của bạn.
+
+16
+00:00:51,800 --> 00:00:55,000
+Xem trước prompt để kiểm tra các thiết lập.
+
+17
+00:00:55,000 --> 00:01:00,000
+Trợ lý trả lời X AI · Trả lời dễ dàng hơn.

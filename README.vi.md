@@ -6,6 +6,18 @@ Khi bạn nhấp vào **biểu tượng trả lời** của một bài đăng tr
 
 Đây là tiện ích Chrome hoàn toàn phía trình duyệt (Manifest V3), không cần máy chủ riêng. API Key chỉ được lưu cục bộ trong `chrome.storage.local`; trình duyệt gửi yêu cầu trực tiếp đến nhà cung cấp mô hình do bạn chọn.
 
+## ▶ Video demo
+
+[![Xem demo tiếng Việt: thao tác trên X thực tế, 60 giây, 1080p](store/real-demos/vi/cover.png)](https://youtu.be/kYoX6VaA7LA)
+
+**[▶ Xem demo tiếng Việt trên YouTube (60 giây · 1080p)](https://youtu.be/kYoX6VaA7LA)**
+
+Thao tác trên X thực tế với thuyết minh và phụ đề tiếng Việt. Nhấp vào ảnh để xem video; giao diện trong bản ghi vẫn là tiếng Trung.
+
+Ngôn ngữ video: [中文](https://youtu.be/dpnf_gy5-6I) | [English](https://youtu.be/Rwp-c2AgEto) | [日本語](https://youtu.be/YlWo3uloYP8) | [Tiếng Việt](https://youtu.be/kYoX6VaA7LA) | [한국어](https://youtu.be/Q62Dzl1gD8s) · [Tệp video và phụ đề](store/real-demos/README.md)
+
+### Xem trước giao diện
+
 ![Xem trước bảng gợi ý](dev/screenshots/vi/panel.png)
 
 Các ảnh chụp bên dưới sử dụng ngôn ngữ giao diện tương ứng với README này; dữ liệu mẫu chỉ dùng để minh họa. Bạn vẫn có thể chuyển giao diện giữa năm ngôn ngữ được liệt kê bên dưới.

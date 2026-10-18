@@ -6,6 +6,18 @@ X(Twitter) 타임라인에서 **답글 아이콘**을 눌러 작성 대화상자
 
 서버가 필요 없는 순수 프런트엔드 Chrome 확장 프로그램(Manifest V3)입니다. API Key는 로컬 `chrome.storage.local`에만 저장되며, 요청은 브라우저에서 선택한 모델 제공업체로 직접 전송됩니다.
 
+## ▶ 데모 영상
+
+[![한국어 데모 보기: 실제 X 사용 과정, 60초, 1080p](store/real-demos/ko/cover.png)](https://youtu.be/Q62Dzl1gD8s)
+
+**[▶ YouTube에서 한국어 데모 보기(60초 · 1080p)](https://youtu.be/Q62Dzl1gD8s)**
+
+실제 X 사용 과정을 한국어 내레이션과 자막으로 소개합니다. 이미지를 클릭하면 영상을 볼 수 있습니다. 녹화된 인터페이스는 중국어입니다.
+
+영상 언어: [中文](https://youtu.be/dpnf_gy5-6I) | [English](https://youtu.be/Rwp-c2AgEto) | [日本語](https://youtu.be/YlWo3uloYP8) | [Tiếng Việt](https://youtu.be/kYoX6VaA7LA) | [한국어](https://youtu.be/Q62Dzl1gD8s) · [영상 파일 및 자막](store/real-demos/README.md)
+
+### 인터페이스 미리보기
+
 ![패널 미리보기](dev/screenshots/ko/panel.png)
 
 아래 스크린샷은 이 README와 같은 언어의 화면을 사용하며, 예시 데이터는 데모용입니다. 화면은 여전히 아래의 다섯 언어로 전환할 수 있습니다.

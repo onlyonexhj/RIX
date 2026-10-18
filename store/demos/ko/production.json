@@ -1,0 +1,106 @@
+{
+  "language": "ko",
+  "name": "한국어",
+  "duration_seconds": 60,
+  "resolution": [
+    1920,
+    1080
+  ],
+  "fps": 30,
+  "video_codec": "H.264",
+  "audio_codec": "AAC",
+  "audio": "localized synthetic narration with ducked instrumental music",
+  "real_extension_ui": true,
+  "fictional_data": true,
+  "captions": [
+    {
+      "start": 0,
+      "end": 3,
+      "text": "X AI 답글 도우미 · 게시물에서 답글까지"
+    },
+    {
+      "start": 3,
+      "end": 5.3,
+      "text": "게시물 아래의 답글 버튼을 누릅니다."
+    },
+    {
+      "start": 5.3,
+      "end": 8.2,
+      "text": "패널이 문맥을 읽고 완성된 후보부터 차례로 표시합니다."
+    },
+    {
+      "start": 8.2,
+      "end": 11,
+      "text": "생성이 끝나면 마음에 드는 답글을 선택하세요."
+    },
+    {
+      "start": 11,
+      "end": 13.2,
+      "text": "후보를 누르면 답글 입력란에 바로 들어갑니다."
+    },
+    {
+      "start": 13.2,
+      "end": 18,
+      "text": "내용을 더 수정한 뒤 게시 여부를 직접 결정할 수 있습니다."
+    },
+    {
+      "start": 18,
+      "end": 23,
+      "text": "유머 스타일로 바꿔 다른 표현을 생성해 보세요."
+    },
+    {
+      "start": 23,
+      "end": 28,
+      "text": "전문적인 스타일로 더 구체적인 답글을 만들 수도 있습니다."
+    },
+    {
+      "start": 28,
+      "end": 31.5,
+      "text": "필요에 맞게 답글 수와 답글 언어를 조정합니다."
+    },
+    {
+      "start": 31.5,
+      "end": 33.8,
+      "text": "한국어 답글 1개를 생성하고 내용을 확인합니다."
+    },
+    {
+      "start": 33.8,
+      "end": 35,
+      "text": "후보를 눌러 새 답글을 입력합니다."
+    },
+    {
+      "start": 35,
+      "end": 38.2,
+      "text": "생성 중에도 언제든 중지할 수 있습니다."
+    },
+    {
+      "start": 38.2,
+      "end": 41,
+      "text": "계속하려면 답글 생성을 다시 누르세요."
+    },
+    {
+      "start": 41,
+      "end": 48,
+      "text": "설정에서 모델 서비스를 선택하고 본인의 API 키를 입력합니다."
+    },
+    {
+      "start": 48,
+      "end": 51.8,
+      "text": "페르소나와 프롬프트로 평소 글쓰기 방식에 맞춥니다."
+    },
+    {
+      "start": 51.8,
+      "end": 55,
+      "text": "프롬프트를 미리 보고 설정을 확인합니다."
+    },
+    {
+      "start": 55,
+      "end": 60,
+      "text": "X AI 답글 도우미로 더 편하게 답글을 쓰세요."
+    }
+  ],
+  "file": "x-ai-reply-demo-voiced-1080p.mp4",
+  "voice": "ko-KR-SunHiNeural",
+  "synthetic_voice": true,
+  "narration_subtitles": "narration.srt"
+}

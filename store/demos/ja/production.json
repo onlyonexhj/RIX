@@ -1,0 +1,106 @@
+{
+  "language": "ja",
+  "name": "日本語",
+  "duration_seconds": 60,
+  "resolution": [
+    1920,
+    1080
+  ],
+  "fps": 30,
+  "video_codec": "H.264",
+  "audio_codec": "AAC",
+  "audio": "localized synthetic narration with ducked instrumental music",
+  "real_extension_ui": true,
+  "fictional_data": true,
+  "captions": [
+    {
+      "start": 0,
+      "end": 3,
+      "text": "X AI 返信アシスタント · ポストから返信までの操作デモ"
+    },
+    {
+      "start": 3,
+      "end": 5.3,
+      "text": "ポストの下にある返信ボタンをクリックします。"
+    },
+    {
+      "start": 5.3,
+      "end": 8.2,
+      "text": "パネルが文脈を読み取り、完成した候補から順に表示します。"
+    },
+    {
+      "start": 8.2,
+      "end": 11,
+      "text": "候補がそろったら、気に入った返信を選びます。"
+    },
+    {
+      "start": 11,
+      "end": 13.2,
+      "text": "候補をクリックすると、返信の入力欄に反映されます。"
+    },
+    {
+      "start": 13.2,
+      "end": 18,
+      "text": "内容を編集し、投稿するかは自分で決められます。"
+    },
+    {
+      "start": 18,
+      "end": 23,
+      "text": "ユーモアに切り替えて、違う表現を生成します。"
+    },
+    {
+      "start": 23,
+      "end": 28,
+      "text": "専門的なスタイルで、より具体的な返信にもできます。"
+    },
+    {
+      "start": 28,
+      "end": 31.5,
+      "text": "必要に応じて、返信の件数と言語を変更します。"
+    },
+    {
+      "start": 31.5,
+      "end": 33.8,
+      "text": "日本語の返信を 1 件生成し、内容を確認します。"
+    },
+    {
+      "start": 33.8,
+      "end": 35,
+      "text": "候補をクリックして、新しい返信を入力します。"
+    },
+    {
+      "start": 35,
+      "end": 38.2,
+      "text": "生成中でも、いつでも中止できます。"
+    },
+    {
+      "start": 38.2,
+      "end": 41,
+      "text": "続けるときは、もう一度「返信を生成」を押します。"
+    },
+    {
+      "start": 41,
+      "end": 48,
+      "text": "設定でモデルサービスを選び、自分の API キーを入力します。"
+    },
+    {
+      "start": 48,
+      "end": 51.8,
+      "text": "ペルソナとプロンプトで、自分らしい書き方に調整します。"
+    },
+    {
+      "start": 51.8,
+      "end": 55,
+      "text": "プロンプトをプレビューして、設定を確認します。"
+    },
+    {
+      "start": 55,
+      "end": 60,
+      "text": "X AI 返信アシスタントで、返信をもっと手軽に。"
+    }
+  ],
+  "file": "x-ai-reply-demo-voiced-1080p.mp4",
+  "voice": "ja-JP-NanamiNeural",
+  "synthetic_voice": true,
+  "narration_subtitles": "narration.srt"
+}

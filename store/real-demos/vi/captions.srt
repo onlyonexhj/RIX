@@ -1,0 +1,31 @@
+﻿1
+00:00:00,000 --> 00:00:03,000
+Trợ lý trả lời X AI · Ghi hình thao tác thực tế
+
+2
+00:00:03,000 --> 00:00:11,000
+Mở hộp trả lời của bài đăng đầu tiên.
+
+3
+00:00:11,000 --> 00:00:19,000
+Trợ lý đọc ngữ cảnh, hiện phong cách, số câu, ngôn ngữ và tự tạo gợi ý.
+
+4
+00:00:19,000 --> 00:00:29,000
+Gợi ý đầu tự điền. Kiểm tra rồi nhấn Trả lời trên X để đăng.
+
+5
+00:00:29,000 --> 00:00:37,000
+Bài tiếp theo có trích dẫn. Nguyên văn tiếng Anh được dịch sang tiếng Trung.
+
+6
+00:00:37,000 --> 00:00:45,000
+Thời gian chờ đã được rút ngắn khi biên tập. Hãy kiểm tra nội dung gợi ý.
+
+7
+00:00:45,000 --> 00:00:55,000
+Sau khi tự điền, người dùng nhấn Trả lời. X lại xác nhận bài đã được gửi.
+
+8
+00:00:55,000 --> 00:01:00,000
+Kiểm tra câu trả lời. Bạn quyết định khi nào đăng.

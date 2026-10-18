@@ -6,6 +6,18 @@ Click **Reply** on a post in your X (Twitter) timeline to open the reply dialog.
 
 This is a client-side Chrome extension built with Manifest V3. No separate application server is required. Your API key is stored locally in `chrome.storage.local`, and your browser sends requests directly to the model provider you select.
 
+## ▶ Demo video
+
+[![Watch the English demo: real X workflow, 60 seconds, 1080p](store/real-demos/en/cover.png)](https://youtu.be/Rwp-c2AgEto)
+
+**[▶ Watch the English demo on YouTube (60s · 1080p)](https://youtu.be/Rwp-c2AgEto)**
+
+A real X workflow with English narration and subtitles. Click the preview to watch; the recorded interface remains in Chinese.
+
+Video languages: [中文](https://youtu.be/dpnf_gy5-6I) | [English](https://youtu.be/Rwp-c2AgEto) | [日本語](https://youtu.be/YlWo3uloYP8) | [Tiếng Việt](https://youtu.be/kYoX6VaA7LA) | [한국어](https://youtu.be/Q62Dzl1gD8s) · [Video files and subtitles](store/real-demos/README.md)
+
+### Interface preview
+
 ![Panel preview](dev/screenshots/en/panel.png)
 
 The screenshots below use this README's interface language, with sample data for demonstration only. The interface can still be switched between all five languages listed below.

@@ -1,0 +1,18 @@
+{
+  "file": "x-ai-reply-real-demo-voiced-1080p.mp4",
+  "language": "ja",
+  "interface_language": "zh",
+  "real_user_recording": true,
+  "localized": [
+    "editorial_titles",
+    "captions",
+    "synthetic_narration"
+  ],
+  "duration_seconds": 60,
+  "resolution": [
+    1920,
+    1080
+  ],
+  "fps": 30,
+  "original_recording_modified": false
+}

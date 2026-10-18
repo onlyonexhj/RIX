@@ -6,6 +6,18 @@
 
 纯前端 Chrome 扩展（Manifest V3），无需服务器；API Key 只存在本地 `chrome.storage.local`，请求由浏览器直接发往你选定的模型服务商。
 
+## ▶ 演示视频
+
+[![点击观看中文版演示：真实 X 页面操作，60 秒，1080p](store/real-demos/zh/cover.png)](https://youtu.be/dpnf_gy5-6I)
+
+**[▶ 在 YouTube 观看中文版（60 秒 · 1080p）](https://youtu.be/dpnf_gy5-6I)**
+
+真实 X 页面操作，中文配音与字幕。点击封面即可观看；录屏界面保留中文。
+
+视频语言：[中文](https://youtu.be/dpnf_gy5-6I) | [English](https://youtu.be/Rwp-c2AgEto) | [日本語](https://youtu.be/YlWo3uloYP8) | [Tiếng Việt](https://youtu.be/kYoX6VaA7LA) | [한국어](https://youtu.be/Q62Dzl1gD8s) · [视频文件与字幕](store/real-demos/README.md)
+
+### 界面预览
+
 ![面板预览](dev/screenshots/zh/panel.png)
 
 下方截图使用本 README 对应的界面语言，示例数据仅供演示；界面仍可切换下方列出的五种语言。

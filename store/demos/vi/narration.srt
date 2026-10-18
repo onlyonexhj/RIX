@@ -1,0 +1,35 @@
+﻿1
+00:00:00,120 --> 00:00:01,970
+Trợ lý trả lời X AI.
+
+2
+00:00:03,120 --> 00:00:07,820
+Mở hộp trả lời. Trợ lý đọc ngữ cảnh và tự tạo các gợi ý.
+
+3
+00:00:11,120 --> 00:00:16,660
+Chọn gợi ý để chèn vào ô trả lời. Sửa lại rồi tự quyết định có đăng hay không.
+
+4
+00:00:18,120 --> 00:00:24,880
+Đổi sang Hài hước cho cách nói vui hơn, hoặc Chuyên nghiệp để tập trung vào ý chính. Chọn phong cách rồi tạo lại.
+
+5
+00:00:28,120 --> 00:00:33,790
+Chọn số câu và tiếng Việt. Tạo gợi ý mới, kiểm tra rồi chèn vào ô trả lời.
+
+6
+00:00:35,120 --> 00:00:38,650
+Bạn có thể dừng bất cứ lúc nào, rồi nhấn tạo lại khi cần.
+
+7
+00:00:41,120 --> 00:00:44,810
+Trong Cài đặt, chọn nhà cung cấp và nhập API key của riêng bạn.
+
+8
+00:00:48,120 --> 00:00:53,430
+Đặt vai trò và tùy chỉnh prompt. Xem trước để câu trả lời hợp cách viết của bạn.
+
+9
+00:00:55,120 --> 00:00:59,170
+Trợ lý trả lời X AI. Trả lời dễ dàng hơn.

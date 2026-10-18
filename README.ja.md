@@ -6,6 +6,18 @@ X（Twitter）のタイムラインで**返信ボタン**を押して投稿ダ�
 
 サーバー不要の Chrome 拡張機能（Manifest V3）です。API Key はローカルの `chrome.storage.local` にのみ保存され、リクエストはブラウザーから選択したモデルのサービス提供元へ直接送信されます。
 
+## ▶ デモ動画
+
+[![日本語デモを見る：実際の X での操作、60 秒、1080p](store/real-demos/ja/cover.png)](https://youtu.be/YlWo3uloYP8)
+
+**[▶ YouTube で日本語デモを見る（60 秒 · 1080p）](https://youtu.be/YlWo3uloYP8)**
+
+実際の X での操作を、日本語のナレーションと字幕で紹介します。画像をクリックしてご覧ください。録画内の画面は中国語です。
+
+動画の言語：[中文](https://youtu.be/dpnf_gy5-6I) | [English](https://youtu.be/Rwp-c2AgEto) | [日本語](https://youtu.be/YlWo3uloYP8) | [Tiếng Việt](https://youtu.be/kYoX6VaA7LA) | [한국어](https://youtu.be/Q62Dzl1gD8s) · [動画ファイルと字幕](store/real-demos/README.md)
+
+### 画面のプレビュー
+
 ![パネルのプレビュー](dev/screenshots/ja/panel.png)
 
 以下のスクリーンショットは、この README と同じ言語の画面を使用しています。サンプルデータはデモ用です。画面は引き続き、以下の 5 言語に切り替えられます。

@@ -1,0 +1,31 @@
+﻿1
+00:00:00,120 --> 00:00:01,970
+Trợ lý trả lời X AI.
+
+2
+00:00:03,120 --> 00:00:08,510
+Đây là bản ghi trên trang X thực tế. Trước tiên, mở hộp trả lời của bài đăng.
+
+3
+00:00:11,120 --> 00:00:16,240
+Trợ lý đọc ngữ cảnh, hiện phong cách, số câu và ngôn ngữ, rồi tự tạo gợi ý.
+
+4
+00:00:19,120 --> 00:00:26,730
+Gợi ý đầu tự điền vào ô trả lời. Sau khi kiểm tra, người dùng nhấn Trả lời trên X. Trang xác nhận bài đã được gửi.
+
+5
+00:00:29,120 --> 00:00:34,420
+Tiếp theo là bài có trích dẫn. Nguyên văn tiếng Anh được hiển thị bằng bản dịch tiếng Trung.
+
+6
+00:00:37,120 --> 00:00:42,780
+Thời gian chờ đã được rút ngắn khi biên tập. Khi gợi ý xuất hiện, hãy kiểm tra nội dung.
+
+7
+00:00:45,120 --> 00:00:53,010
+Gợi ý đầu lại tự điền. Người dùng nhấn Trả lời và X xác nhận đã gửi. Bạn vẫn có thể sửa trước khi đăng.
+
+8
+00:00:55,120 --> 00:00:58,860
+Kiểm tra câu trả lời. Bạn quyết định khi nào đăng.

@@ -1,0 +1,106 @@
+{
+  "language": "en",
+  "name": "English",
+  "duration_seconds": 60,
+  "resolution": [
+    1920,
+    1080
+  ],
+  "fps": 30,
+  "video_codec": "H.264",
+  "audio_codec": "AAC",
+  "audio": "localized synthetic narration with ducked instrumental music",
+  "real_extension_ui": true,
+  "fictional_data": true,
+  "captions": [
+    {
+      "start": 0,
+      "end": 3,
+      "text": "X AI Reply Assistant · From a post to your reply"
+    },
+    {
+      "start": 3,
+      "end": 5.3,
+      "text": "Select the Reply button below a post."
+    },
+    {
+      "start": 5.3,
+      "end": 8.2,
+      "text": "The panel reads the context and shows completed suggestions as they arrive."
+    },
+    {
+      "start": 8.2,
+      "end": 11,
+      "text": "Once the suggestions are ready, choose one you like."
+    },
+    {
+      "start": 11,
+      "end": 13.2,
+      "text": "Select a suggestion to insert it into the reply editor."
+    },
+    {
+      "start": 13.2,
+      "end": 18,
+      "text": "Keep editing, then decide for yourself whether to post."
+    },
+    {
+      "start": 18,
+      "end": 23,
+      "text": "Switch to Humor and generate a different take."
+    },
+    {
+      "start": 23,
+      "end": 28,
+      "text": "Or choose Professional for a more focused response."
+    },
+    {
+      "start": 28,
+      "end": 31.5,
+      "text": "Adjust the number of replies and the reply language."
+    },
+    {
+      "start": 31.5,
+      "end": 33.8,
+      "text": "Generate one English reply and check the content."
+    },
+    {
+      "start": 33.8,
+      "end": 35,
+      "text": "Select the suggestion to insert your new reply."
+    },
+    {
+      "start": 35,
+      "end": 38.2,
+      "text": "You can stop a request while it is generating."
+    },
+    {
+      "start": 38.2,
+      "end": 41,
+      "text": "Select Generate replies again when you want to continue."
+    },
+    {
+      "start": 41,
+      "end": 48,
+      "text": "Choose a model provider in Settings and enter your own API key."
+    },
+    {
+      "start": 48,
+      "end": 51.8,
+      "text": "Set your persona and prompts to match the way you write."
+    },
+    {
+      "start": 51.8,
+      "end": 55,
+      "text": "Preview the prompt to check your settings."
+    },
+    {
+      "start": 55,
+      "end": 60,
+      "text": "X AI Reply Assistant · Make replying easier."
+    }
+  ],
+  "file": "x-ai-reply-demo-voiced-1080p.mp4",
+  "voice": "en-US-JennyNeural",
+  "synthetic_voice": true,
+  "narration_subtitles": "narration.srt"
+}

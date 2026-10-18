@@ -1,0 +1,187 @@
+{
+  "source_filename": "主页 _ X - Google Chrome 2026-10-18 19-03-35.mp4",
+  "source_duration": 76.77,
+  "interface_language": "zh",
+  "edited_waits": true,
+  "real_recording": true,
+  "shots": [
+    {
+      "id": "intro",
+      "chapter": 0,
+      "source_start": 28.0,
+      "source_end": 28.04,
+      "duration": 3.0,
+      "roi": "close",
+      "blur": true,
+      "output_start": 0.0,
+      "output_end": 3.0,
+      "hold_seconds": 2.96,
+      "crop": [
+        120,
+        160,
+        1632,
+        918
+      ]
+    },
+    {
+      "id": "open",
+      "chapter": 1,
+      "source_start": 7.8,
+      "source_end": 11.8,
+      "duration": 8.0,
+      "roi": "close",
+      "output_start": 3.0,
+      "output_end": 11.0,
+      "hold_seconds": 4.0,
+      "crop": [
+        120,
+        160,
+        1632,
+        918
+      ]
+    },
+    {
+      "id": "options",
+      "chapter": 2,
+      "source_start": 11.8,
+      "source_end": 18.0,
+      "duration": 8.0,
+      "roi": "close",
+      "output_start": 11.0,
+      "output_end": 19.0,
+      "hold_seconds": 1.8,
+      "crop": [
+        120,
+        160,
+        1632,
+        918
+      ]
+    },
+    {
+      "id": "first-filled",
+      "chapter": 3,
+      "source_start": 25.8,
+      "source_end": 29.6,
+      "duration": 5.8,
+      "roi": "close",
+      "output_start": 19.0,
+      "output_end": 24.8,
+      "hold_seconds": 2.0,
+      "crop": [
+        120,
+        160,
+        1632,
+        918
+      ]
+    },
+    {
+      "id": "first-sent",
+      "chapter": 3,
+      "source_start": 29.6,
+      "source_end": 31.8,
+      "duration": 4.2,
+      "roi": "wide",
+      "output_start": 24.8,
+      "output_end": 29.0,
+      "hold_seconds": 2.0,
+      "crop": [
+        0,
+        140,
+        2304,
+        1296
+      ]
+    },
+    {
+      "id": "quoted-post",
+      "chapter": 4,
+      "source_start": 48.6,
+      "source_end": 56.6,
+      "duration": 8.0,
+      "roi": "close",
+      "output_start": 29.0,
+      "output_end": 37.0,
+      "hold_seconds": 0.0,
+      "crop": [
+        120,
+        160,
+        1632,
+        918
+      ]
+    },
+    {
+      "id": "second-results",
+      "chapter": 5,
+      "source_start": 60.8,
+      "source_end": 63.9,
+      "duration": 8.0,
+      "roi": "close",
+      "output_start": 37.0,
+      "output_end": 45.0,
+      "hold_seconds": 4.9,
+      "crop": [
+        120,
+        160,
+        1632,
+        918
+      ]
+    },
+    {
+      "id": "second-filled",
+      "chapter": 6,
+      "source_start": 64.0,
+      "source_end": 68.8,
+      "duration": 4.8,
+      "roi": "close",
+      "output_start": 45.0,
+      "output_end": 49.8,
+      "hold_seconds": 0.0,
+      "crop": [
+        120,
+        160,
+        1632,
+        918
+      ]
+    },
+    {
+      "id": "second-sent",
+      "chapter": 6,
+      "source_start": 71.2,
+      "source_end": 74.0,
+      "duration": 5.2,
+      "roi": "wide",
+      "output_start": 49.8,
+      "output_end": 55.0,
+      "hold_seconds": 2.4,
+      "crop": [
+        0,
+        140,
+        2304,
+        1296
+      ]
+    },
+    {
+      "id": "outro",
+      "chapter": 7,
+      "source_start": 67.0,
+      "source_end": 67.04,
+      "duration": 5.0,
+      "roi": "close",
+      "blur": true,
+      "output_start": 55.0,
+      "output_end": 60.0,
+      "hold_seconds": 4.96,
+      "crop": [
+        120,
+        160,
+        1632,
+        918
+      ]
+    }
+  ],
+  "notes": [
+    "First suggestions were automatically inserted in the recording.",
+    "The original user manually sent both replies; successful-send notifications are shown.",
+    "No settings, stop/retry, style switching or language switching is staged."
+  ],
+  "source_sha256": "ee934952e821a6ef2126a27ea1dbdc40b4b5f471e66fd91bf94736569b7d2aa5"
+}

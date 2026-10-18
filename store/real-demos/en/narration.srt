@@ -1,0 +1,31 @@
+﻿1
+00:00:00,120 --> 00:00:01,770
+X AI Reply Assistant.
+
+2
+00:00:03,120 --> 00:00:08,540
+This is a recording of a real X page. First, open the post's reply dialog.
+
+3
+00:00:11,120 --> 00:00:16,780
+The panel reads the context, shows the style, count, and reply language, and starts generating.
+
+4
+00:00:19,120 --> 00:00:28,780
+The first suggestion fills the editor automatically. After reviewing it, the user clicks X's Reply button. The page confirms the post was sent.
+
+5
+00:00:29,120 --> 00:00:35,220
+Next, open a post with quoted content. Its English text is shown in Chinese translation.
+
+6
+00:00:37,120 --> 00:00:42,920
+The waiting time is shortened in this edit. When suggestions appear, check that they say what you mean.
+
+7
+00:00:45,120 --> 00:00:54,820
+Again, the first suggestion fills automatically. The user clicks Reply, and X confirms it was sent. You can still edit the text before posting.
+
+8
+00:00:55,120 --> 00:00:58,670
+Review your reply. You decide when to post.

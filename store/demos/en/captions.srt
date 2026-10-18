@@ -1,0 +1,67 @@
+﻿1
+00:00:00,000 --> 00:00:03,000
+X AI Reply Assistant · From a post to your reply
+
+2
+00:00:03,000 --> 00:00:05,300
+Select the Reply button below a post.
+
+3
+00:00:05,300 --> 00:00:08,200
+The panel reads the context and shows completed suggestions as they arrive.
+
+4
+00:00:08,200 --> 00:00:11,000
+Once the suggestions are ready, choose one you like.
+
+5
+00:00:11,000 --> 00:00:13,200
+Select a suggestion to insert it into the reply editor.
+
+6
+00:00:13,200 --> 00:00:18,000
+Keep editing, then decide for yourself whether to post.
+
+7
+00:00:18,000 --> 00:00:23,000
+Switch to Humor and generate a different take.
+
+8
+00:00:23,000 --> 00:00:28,000
+Or choose Professional for a more focused response.
+
+9
+00:00:28,000 --> 00:00:31,500
+Adjust the number of replies and the reply language.
+
+10
+00:00:31,500 --> 00:00:33,800
+Generate one English reply and check the content.
+
+11
+00:00:33,800 --> 00:00:35,000
+Select the suggestion to insert your new reply.
+
+12
+00:00:35,000 --> 00:00:38,200
+You can stop a request while it is generating.
+
+13
+00:00:38,200 --> 00:00:41,000
+Select Generate replies again when you want to continue.
+
+14
+00:00:41,000 --> 00:00:48,000
+Choose a model provider in Settings and enter your own API key.
+
+15
+00:00:48,000 --> 00:00:51,800
+Set your persona and prompts to match the way you write.
+
+16
+00:00:51,800 --> 00:00:55,000
+Preview the prompt to check your settings.
+
+17
+00:00:55,000 --> 00:01:00,000
+X AI Reply Assistant · Make replying easier.
