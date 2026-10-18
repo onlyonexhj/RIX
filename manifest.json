@@ -1,12 +1,13 @@
 {
   "manifest_version": 3,
   "name": "X AI 回复助手",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "在 X 推文时间线点击回复气泡后，用 AI 生成多条回复候选，一键回填到发帖输入框。",
   "minimum_chrome_version": "116",
-
-  "permissions": ["storage", "proxy"],
-
+  "permissions": [
+    "storage",
+    "proxy"
+  ],
   "host_permissions": [
     "https://x.com/*",
     "https://twitter.com/*",
@@ -18,16 +19,20 @@
     "https://openrouter.ai/*",
     "https://generativelanguage.googleapis.com/*"
   ],
-
-  "optional_host_permissions": ["https://*/*", "http://*/*", "http://localhost/*"],
-
+  "optional_host_permissions": [
+    "https://*/*",
+    "http://*/*",
+    "http://localhost/*"
+  ],
   "background": {
     "service_worker": "src/background/service-worker.js"
   },
-
   "content_scripts": [
     {
-      "matches": ["https://x.com/*", "https://twitter.com/*"],
+      "matches": [
+        "https://x.com/*",
+        "https://twitter.com/*"
+      ],
       "js": [
         "src/shared/config.js",
         "src/shared/utils.js",
@@ -37,12 +42,13 @@
         "src/content/panel.js",
         "src/content/main.js"
       ],
-      "css": ["src/content/content.css"],
+      "css": [
+        "src/content/content.css"
+      ],
       "run_at": "document_idle",
       "all_frames": false
     }
   ],
-
   "action": {
     "default_popup": "src/popup/popup.html",
     "default_title": "X AI 回复助手",
@@ -53,9 +59,7 @@
       "128": "icons/icon128.png"
     }
   },
-
   "options_page": "src/options/options.html",
-
   "icons": {
     "16": "icons/icon16.png",
     "32": "icons/icon32.png",
