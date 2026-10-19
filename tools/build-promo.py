@@ -37,7 +37,7 @@ CAPTIONS = [
     '多种回复风格，找到适合这条推文的表达。',
     '自定义人设与提示词，让表达更贴近你。',
     '多家模型自由选，API Key 保存在浏览器本地。',
-    'X AI 回复助手，把想说的话写出来。',
+    'RIX，把想说的话写出来。',
 ]
 COPY = {
     1: ('01  /  从一条推文开始', '点开回复，\n灵感就到。',
@@ -143,7 +143,7 @@ class Film:
         im = self.bg.copy()
         logo = self.logo.resize((54, 54), Image.Resampling.LANCZOS)
         paste_alpha(im, logo, (88, 50))
-        text(im, (162, 55), 'X AI 回复助手', 28, bold=True)
+        text(im, (162, 55), 'RIX', 28, bold=True)
         draw = ImageDraw.Draw(im)
         draw.rounded_rectangle((1530, 57, 1828, 99), 21, fill='#111d2d', outline='#2a3d56')
         text(im, (1557, 64), 'CHROME EXTENSION', 18, '#bdcce0')
@@ -155,7 +155,7 @@ class Film:
         if index == 0:
             text(im, (112, 244), '让每一次回复，更像你', 27, BLUE)
             text(im, (108, 308), '好回复，\n不必从零开始。', 88, bold=True, spacing=25)
-            text(im, (116, 576), 'X AI 回复助手', 36, '#c5d7ef')
+            text(im, (116, 576), 'RIX', 36, '#c5d7ef')
             text(im, (116, 639), '从推文到回复，让想法自然落笔。', 27, MUTED)
             draw = ImageDraw.Draw(im)
             draw.rounded_rectangle((115, 739, 474, 793), 27, fill='#183455', outline='#3975ad')
@@ -163,7 +163,7 @@ class Film:
         elif index == 6:
             logo = self.logo.resize((132, 132), Image.Resampling.LANCZOS)
             paste_alpha(im, logo, ((W - 132) / 2, 224))
-            center(im, 403, 'X AI 回复助手', 78, bold=True)
+            center(im, 403, 'RIX', 78, bold=True)
             center(im, 521, '把想说的话写出来。', 42, '#c8d9ef')
             center(im, 620, '自动生成  ·  多种风格  ·  一键回填', 28, MUTED)
             center(im, 726, 'github.com/onlyonexhj/X-AI-replay', 28, BLUE)
@@ -302,7 +302,7 @@ class Film:
 
 def export_notes(out_dir):
     position = 0
-    subtitles, storyboard = [], ['# X AI 回复助手 · 横屏产品介绍', '',
+    subtitles, storyboard = [], ['# RIX · 横屏产品介绍', '',
         '- 1920×1080，30fps，40 秒，H.264 / AAC。',
         '- 中文字幕与程序合成背景音乐，无旁白。',
         '- 使用当前扩展界面；推文、模型回复和 API Key 均为演示数据。',

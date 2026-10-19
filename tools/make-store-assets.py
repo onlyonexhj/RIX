@@ -152,7 +152,7 @@ h1{font-size:21px;font-weight:800;letter-spacing:-.2px}
   color:#4db2f5;border-radius:5px;padding:3px 8px}
 </style></head><body>
 <div class="logo">✦</div>
-<h1>X AI 回复助手</h1>
+<h1>RIX</h1>
 <div class="sub">点回复气泡，AI 秒出多条候选<br>一键回填，直接发帖</div>
 <div class="tags"><span class="tag">流式输出</span><span class="tag">提示词可配置</span><span class="tag">多服务商</span></div>
 </body></html>""")

@@ -54,7 +54,7 @@ CONTENT_SCRIPTS = [
 
 
 FIXTURE_HTML = """<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">
-<title>X AI 回复助手 · 虚构演示</title><style>
+<title>RIX · 虚构演示</title><style>
 *{box-sizing:border-box}body{margin:0;background:#080d13;color:#e7e9ea;
 font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif}
 button{font:inherit;cursor:pointer}a{color:inherit;text-decoration:none}

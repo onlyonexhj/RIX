@@ -233,7 +233,7 @@ async function callOpenAI(cfg, prompt, signal) {
   // OpenRouter 需要 referer 头
   if (/openrouter/i.test(base)) {
     headers['HTTP-Referer'] = 'https://github.com/xai-reply';
-    headers['X-Title'] = 'X AI Reply';
+    headers['X-Title'] = 'RIX';
   }
 
   const res = await fetch(url, {
@@ -445,7 +445,7 @@ async function callOpenAIStream(cfg, prompt, signal, onDelta) {
   };
   if (/openrouter/i.test(base)) {
     headers['HTTP-Referer'] = 'https://github.com/xai-reply';
-    headers['X-Title'] = 'X AI Reply';
+    headers['X-Title'] = 'RIX';
   }
 
   const res = await fetch(url, {

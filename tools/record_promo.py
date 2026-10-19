@@ -1,4 +1,4 @@
-"""一键录制 X AI 回复助手宣传视频（真实扩展 + 真实 X 登录态 + 本地模拟 AI）。
+"""一键录制 RIX宣传视频（真实扩展 + 真实 X 登录态 + 本地模拟 AI）。
 
 做法（参考项目 test-e2e.py 的扩展加载方式）：
   用 Playwright 自带的 Chromium（channel="chromium"，支持 --load-extension，

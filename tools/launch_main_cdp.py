@@ -44,7 +44,7 @@ async def main():
         # 找扩展 id（看是否装了我们的扩展）
         ext_id = None
         for sw in ctx.service_workers + ctx.background_pages:
-            if "options.html" in sw.url or "service-worker" in sw.url or "X AI" in sw.url:
+            if "options.html" in sw.url or "service-worker" in sw.url or "RIX" in sw.url:
                 m = re.search(r"chrome-extension://([a-p]{32})/", sw.url)
                 if m:
                     ext_id = m.group(1)

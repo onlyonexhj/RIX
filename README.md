@@ -1,4 +1,4 @@
-# X AI 回复助手
+# RIX
 
 [![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/License-PolyForm_NC_1.0.0-8B5CF6)](LICENSE)
 [![Chrome Web Store](https://img.shields.io/badge/Chrome-%E5%95%86%E5%BA%97%E5%B7%B2%E4%B8%8A%E6%9E%B6-4285F4)](https://chromewebstore.google.com)

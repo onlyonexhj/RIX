@@ -8,7 +8,7 @@ LANGUAGES = ("zh", "en", "ja", "vi", "ko")
 COPY = {
     "zh": {
         "name": "中文",
-        "product": "X AI 回复助手",
+        "product": "RIX",
         "header": "产品操作演示 / 1080p",
         "intro_lines": ["从一条推文", "到你的下一条回复"],
         "intro_subtitle": "60 秒操作演示",
@@ -24,7 +24,7 @@ COPY = {
         ],
         "steps": ["打开回复", "选择填入", "切换风格", "条数与语言", "中止与重试", "模型服务", "人设与提示词"],
         "captions": [
-            "X AI 回复助手 · 从推文到回复的完整演示",
+            "RIX · 从推文到回复的完整演示",
             "点击推文下方的回复按钮。",
             "面板自动读取上下文，逐条显示生成的候选。",
             "候选回复生成完成，挑选你喜欢的一条。",
@@ -40,7 +40,7 @@ COPY = {
             "在设置中选择模型服务，填写自己的 API Key。",
             "设置人设与提示词，让回复更符合你的表达习惯。",
             "预览提示内容，确认设置是否符合预期。",
-            "X AI 回复助手，让表达更轻松。",
+            "RIX，让表达更轻松。",
         ],
         "disclaimer": "示例界面与推文 · AI 回复为模拟内容",
         "statuses": {
@@ -65,7 +65,7 @@ COPY = {
     },
     "en": {
         "name": "English",
-        "product": "X AI Reply Assistant",
+        "product": "RIX",
         "header": "Product walkthrough / 1080p",
         "intro_lines": ["From a post", "to your next reply"],
         "intro_subtitle": "A 60-second walkthrough",
@@ -81,7 +81,7 @@ COPY = {
         ],
         "steps": ["Open Reply", "Pick and insert", "Switch styles", "Count & language", "Stop & retry", "Model provider", "Persona & prompts"],
         "captions": [
-            "X AI Reply Assistant · From a post to your reply",
+            "RIX · From a post to your reply",
             "Select the Reply button below a post.",
             "The panel reads the context and shows completed suggestions as they arrive.",
             "Once the suggestions are ready, choose one you like.",
@@ -97,7 +97,7 @@ COPY = {
             "Choose a model provider in Settings and enter your own API key.",
             "Set your persona and prompts to match the way you write.",
             "Preview the prompt to check your settings.",
-            "X AI Reply Assistant · Make replying easier.",
+            "RIX · Make replying easier.",
         ],
         "disclaimer": "Example interface and posts · Simulated AI replies",
         "statuses": {
@@ -122,7 +122,7 @@ COPY = {
     },
     "ja": {
         "name": "日本語",
-        "product": "X AI 返信アシスタント",
+        "product": "RIX",
         "header": "操作デモ / 1080p",
         "intro_lines": ["ひとつのポストから", "あなたらしい返信へ"],
         "intro_subtitle": "60 秒でわかる操作デモ",
@@ -138,7 +138,7 @@ COPY = {
         ],
         "steps": ["返信を開く", "候補を入力", "スタイル", "件数と言語", "中止と再生成", "モデルサービス", "ペルソナと指示"],
         "captions": [
-            "X AI 返信アシスタント · ポストから返信までの操作デモ",
+            "RIX · ポストから返信までの操作デモ",
             "ポストの下にある返信ボタンをクリックします。",
             "パネルが文脈を読み取り、完成した候補から順に表示します。",
             "候補がそろったら、気に入った返信を選びます。",
@@ -154,7 +154,7 @@ COPY = {
             "設定でモデルサービスを選び、自分の API キーを入力します。",
             "ペルソナとプロンプトで、自分らしい書き方に調整します。",
             "プロンプトをプレビューして、設定を確認します。",
-            "X AI 返信アシスタントで、返信をもっと手軽に。",
+            "RIXで、返信をもっと手軽に。",
         ],
         "disclaimer": "画面とポストはサンプル · AI の返信は模擬データです",
         "statuses": {
@@ -179,7 +179,7 @@ COPY = {
     },
     "vi": {
         "name": "Tiếng Việt",
-        "product": "Trợ lý trả lời X AI",
+        "product": "RIX",
         "header": "Hướng dẫn sử dụng / 1080p",
         "intro_lines": ["Từ một bài đăng", "đến câu trả lời của bạn"],
         "intro_subtitle": "Hướng dẫn trong 60 giây",
@@ -195,7 +195,7 @@ COPY = {
         ],
         "steps": ["Mở Trả lời", "Chọn và chèn", "Phong cách", "Số câu & ngôn ngữ", "Dừng và thử lại", "Nhà cung cấp", "Vai trò & prompt"],
         "captions": [
-            "Trợ lý trả lời X AI · Từ bài đăng đến câu trả lời",
+            "RIX · Từ bài đăng đến câu trả lời",
             "Nhấn nút Trả lời bên dưới bài đăng.",
             "Bảng đọc ngữ cảnh và lần lượt hiển thị các gợi ý đã hoàn tất.",
             "Khi tạo xong, chọn một câu trả lời bạn thích.",
@@ -211,7 +211,7 @@ COPY = {
             "Chọn nhà cung cấp trong Cài đặt và nhập API key của bạn.",
             "Thiết lập vai trò và prompt để câu trả lời hợp cách viết của bạn.",
             "Xem trước prompt để kiểm tra các thiết lập.",
-            "Trợ lý trả lời X AI · Trả lời dễ dàng hơn.",
+            "RIX · Trả lời dễ dàng hơn.",
         ],
         "disclaimer": "Giao diện và bài đăng mẫu · Câu trả lời AI được mô phỏng",
         "statuses": {
@@ -236,7 +236,7 @@ COPY = {
     },
     "ko": {
         "name": "한국어",
-        "product": "X AI 답글 도우미",
+        "product": "RIX",
         "header": "제품 사용 데모 / 1080p",
         "intro_lines": ["게시물 하나에서", "나만의 답글까지"],
         "intro_subtitle": "60초 사용 데모",
@@ -252,7 +252,7 @@ COPY = {
         ],
         "steps": ["답글 열기", "선택해 입력", "스타일 변경", "개수와 언어", "중지와 재시도", "모델 서비스", "페르소나와 지침"],
         "captions": [
-            "X AI 답글 도우미 · 게시물에서 답글까지",
+            "RIX · 게시물에서 답글까지",
             "게시물 아래의 답글 버튼을 누릅니다.",
             "패널이 문맥을 읽고 완성된 후보부터 차례로 표시합니다.",
             "생성이 끝나면 마음에 드는 답글을 선택하세요.",
@@ -268,7 +268,7 @@ COPY = {
             "설정에서 모델 서비스를 선택하고 본인의 API 키를 입력합니다.",
             "페르소나와 프롬프트로 평소 글쓰기 방식에 맞춥니다.",
             "프롬프트를 미리 보고 설정을 확인합니다.",
-            "X AI 답글 도우미로 더 편하게 답글을 쓰세요.",
+            "RIX로 더 편하게 답글을 쓰세요.",
         ],
         "disclaimer": "예시 화면과 게시물 · AI 답글은 모의 데이터입니다",
         "statuses": {

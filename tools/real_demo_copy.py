@@ -25,7 +25,7 @@ WINDOWS = (
 
 COPY = {
     "zh": {
-        "product": "X AI 回复助手",
+        "product": "RIX",
         "header": "真实 X 页面实录",
         "edited_badge": "实录经剪辑 · 等待已压缩",
         "footer": "画面保留原始中文界面",
@@ -36,7 +36,7 @@ COPY = {
             "换一条帖子", "查看生成结果", "确认发送成功", "发布由你决定",
         ],
         "captions": [
-            "X AI 回复助手 · 真实页面操作实录",
+            "RIX · 真实页面操作实录",
             "打开第一条推文的回复框。",
             "面板读取上下文，展示风格、条数和输出语言，并自动开始生成。",
             "首条候选自动填入；检查后点击 X 的“回复”，页面提示发送成功。",
@@ -46,7 +46,7 @@ COPY = {
             "检查回复，发布由你决定。",
         ],
         "narration": [
-            "X AI 回复助手。",
+            "RIX。",
             "这是在真实 X 页面上的操作。先点开第一条推文的回复框。",
             "面板读取上下文，显示风格、条数和输出语言，并自动开始生成。",
             "首条候选自动填入回复框。检查内容后，点击 X 的回复按钮，页面显示帖子已发送。",
@@ -57,7 +57,7 @@ COPY = {
         ],
     },
     "en": {
-        "product": "X AI Reply Assistant",
+        "product": "RIX",
         "header": "Recorded on a real X page",
         "edited_badge": "Edited recording · Waits shortened",
         "footer": "Original Chinese interface retained",
@@ -68,7 +68,7 @@ COPY = {
             "Try another post", "Review the results", "Confirm it was sent", "You decide when to post",
         ],
         "captions": [
-            "X AI Reply Assistant · A real screen recording",
+            "RIX · A real screen recording",
             "Open the reply dialog for the first post.",
             "The panel reads the context, shows style, count and language, and starts generating.",
             "The first suggestion fills automatically. Review, then click X’s Reply button to post.",
@@ -78,7 +78,7 @@ COPY = {
             "Review your reply. You decide when to post.",
         ],
         "narration": [
-            "X AI Reply Assistant.",
+            "RIX.",
             "This is a recording of a real X page. First, open the post's reply dialog.",
             "The panel reads the context, shows the style, count, and reply language, and starts generating.",
             "The first suggestion fills the editor automatically. After reviewing it, the user clicks X's Reply button. The page confirms the post was sent.",
@@ -89,7 +89,7 @@ COPY = {
         ],
     },
     "ja": {
-        "product": "X AI 返信アシスタント",
+        "product": "RIX",
         "header": "実際の X ページを収録",
         "edited_badge": "編集済み · 待ち時間を短縮",
         "footer": "元の中国語画面を使用",
@@ -100,7 +100,7 @@ COPY = {
             "別の投稿でも試す", "生成結果を確認", "送信完了を確認", "投稿は自分で決める",
         ],
         "captions": [
-            "X AI 返信アシスタント · 実際のページで操作を収録",
+            "RIX · 実際のページで操作を収録",
             "最初の投稿の返信画面を開きます。",
             "文脈を読み取り、スタイル・件数・言語を表示。自動で生成が始まります。",
             "最初の候補が自動入力されます。確認して X の返信ボタンを押すと、送信完了の表示。",
@@ -110,7 +110,7 @@ COPY = {
             "返信を確認。投稿は自分で決める。",
         ],
         "narration": [
-            "X AI 返信アシスタント。",
+            "RIX。",
             "実際の X ページでの操作です。まず、投稿の返信画面を開きます。",
             "文脈を読み取り、スタイル、件数、言語を表示。自動で生成が始まります。",
             "最初の候補が自動入力されます。確認して X の返信ボタンを押すと、投稿の送信完了が表示されます。",
@@ -121,7 +121,7 @@ COPY = {
         ],
     },
     "vi": {
-        "product": "Trợ lý trả lời X AI",
+        "product": "RIX",
         "header": "Ghi hình trên trang X thực tế",
         "edited_badge": "Đã biên tập · Rút ngắn thời gian chờ",
         "footer": "Giữ nguyên giao diện tiếng Trung",
@@ -132,7 +132,7 @@ COPY = {
             "Thử bài đăng khác", "Xem kết quả", "Xác nhận đã gửi", "Bạn quyết định khi nào đăng",
         ],
         "captions": [
-            "Trợ lý trả lời X AI · Ghi hình thao tác thực tế",
+            "RIX · Ghi hình thao tác thực tế",
             "Mở hộp trả lời của bài đăng đầu tiên.",
             "Trợ lý đọc ngữ cảnh, hiện phong cách, số câu, ngôn ngữ và tự tạo gợi ý.",
             "Gợi ý đầu tự điền. Kiểm tra rồi nhấn Trả lời trên X để đăng.",
@@ -142,7 +142,7 @@ COPY = {
             "Kiểm tra câu trả lời. Bạn quyết định khi nào đăng.",
         ],
         "narration": [
-            "Trợ lý trả lời X AI.",
+            "RIX.",
             "Đây là bản ghi trên trang X thực tế. Trước tiên, mở hộp trả lời của bài đăng.",
             "Trợ lý đọc ngữ cảnh, hiện phong cách, số câu và ngôn ngữ, rồi tự tạo gợi ý.",
             "Gợi ý đầu tự điền vào ô trả lời. Sau khi kiểm tra, người dùng nhấn Trả lời trên X. Trang xác nhận bài đã được gửi.",
@@ -153,7 +153,7 @@ COPY = {
         ],
     },
     "ko": {
-        "product": "X AI 답글 도우미",
+        "product": "RIX",
         "header": "실제 X 페이지 녹화",
         "edited_badge": "편집된 녹화 · 대기 시간 단축",
         "footer": "원본 중국어 화면 유지",
@@ -164,7 +164,7 @@ COPY = {
             "다른 게시물에서 시도", "생성 결과 확인", "전송 완료 확인", "게시는 직접 결정",
         ],
         "captions": [
-            "X AI 답글 도우미 · 실제 페이지에서 녹화한 사용 과정",
+            "RIX · 실제 페이지에서 녹화한 사용 과정",
             "첫 번째 게시물의 답글 창을 엽니다.",
             "문맥을 읽고 스타일, 개수, 언어를 표시하며 자동으로 생성을 시작합니다.",
             "첫 후보가 자동 입력됩니다. 확인 후 X의 답글 버튼을 누르면 전송 완료가 표시됩니다.",
@@ -174,7 +174,7 @@ COPY = {
             "답글을 확인하고, 게시는 직접 결정하세요.",
         ],
         "narration": [
-            "X AI 답글 도우미.",
+            "RIX.",
             "실제 X 페이지에서 녹화한 사용 과정입니다. 먼저 게시물의 답글 창을 엽니다.",
             "문맥을 읽고 스타일, 개수, 답글 언어를 표시하며, 자동으로 생성을 시작합니다.",
             "첫 후보가 자동 입력됩니다. 내용을 확인하고 X의 답글 버튼을 누르면, 게시물이 전송되었다는 안내가 표시됩니다.",

@@ -149,7 +149,7 @@ async def capture_panel(context, language, scene, output):
         await expect(page.locator('[data-k="uiLang"]')).to_have_value(language)
         await expect(page.locator('[data-k="lang"]')).to_have_value(language)
         await expect(page.locator('.xai-it__x')).to_have_text(scene["replies"])
-        title = await page.evaluate('XAI.i18n.t("AI 回复助手")')
+        title = await page.evaluate('XAI.i18n.t("RIX")')
         await expect(page.locator('.xai-hd__t')).to_have_text(title)
         await stable(page)
         # Keep both the real panel and reply composer completely in the image.

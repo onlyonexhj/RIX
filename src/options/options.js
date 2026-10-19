@@ -83,7 +83,7 @@
       XAI.i18n.apply(document);
       if (document.documentElement) document.documentElement.lang = XAI.i18n.getLocale();
     }
-    document.title = t('X AI 回复助手 · 设置');
+    document.title = t('RIX · 设置');
     // 保留 select 节点、已选项以及所有输入框的草稿/光标。
     fill($('uiLang'), [['auto', t('跟随浏览器')]].concat(
       (XAI.i18n ? XAI.i18n.languages : [

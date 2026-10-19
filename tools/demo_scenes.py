@@ -71,7 +71,7 @@ def fixture_html(language: str) -> str:
     result = result.replace('<span class="draft-label">' + html.escape(words[18]) + '</span>', '<span class="draft-label">' + html.escape(scene["drafts"]) + '</span>')
     result = result.replace('disabled>' + html.escape(words[18]) + '</button>', 'disabled>' + html.escape(scene["reply_button"]) + '</button>')
     result = result.replace('lang="zh-CN"', 'lang="' + scene["locale"] + '"')
-    result = result.replace('X AI ' + html.escape(words[18]) + '助手 · 虚构演示', html.escape(COPY[language]["product"]))
+    result = result.replace('RIX · 虚构演示', html.escape(COPY[language]["product"]))
     return result
 
 

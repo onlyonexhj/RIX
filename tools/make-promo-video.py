@@ -261,7 +261,7 @@ def make_endcard():
     im.paste(logo, ((W - 148) // 2, 142), logo)
 
     f_t = font(FONT_BOLD, 82)
-    t = "X AI 回复助手"
+    t = "RIX"
     tb = d.textbbox((0, 0), t, font=f_t)
     d.text(((W - (tb[2] - tb[0])) // 2, 340), t, font=f_t, fill=(231, 233, 234, 255))
 

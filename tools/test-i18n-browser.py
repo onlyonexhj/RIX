@@ -119,7 +119,7 @@ async def main():
                 await page.select_option('[data-k="uiLang"]', language)
                 await page.wait_for_function('code => XAI.i18n.getLocale() === code', arg=language)
                 check(language + ' panel labels switch without changing replies, draft or source',
-                      await page.locator('.xai-hd__t').inner_text() == await page.evaluate('XAI.i18n.t("AI 回复助手")') and
+                      await page.locator('.xai-hd__t').inner_text() == await page.evaluate('XAI.i18n.t("RIX")') and
                       await page.locator('.xai-it__x').inner_text() == 'Nội dung trả lời mẫu. 保留原文。' and
                       await page.locator('#ed').inner_text() == 'Keep this draft unchanged. 原始草稿。' and
                       await page.locator('#tweetText').inner_text() == original)
@@ -148,7 +148,7 @@ async def main():
             await page.evaluate('() => fakeChange({uiLang:"vi"})')
             check('external settings update an open panel in place',
                   await page.locator('[data-k="uiLang"]').input_value() == 'vi' and
-                  await page.locator('.xai-hd__t').inner_text() == await page.evaluate('XAI.i18n.t("AI 回复助手")'))
+                  await page.locator('.xai-hd__t').inner_text() == await page.evaluate('XAI.i18n.t("RIX")'))
             used = await page.evaluate('() => XAI.panel.use(0)')
             check('localized candidate still fills the actual reply editor',
                   used and await page.locator('#ed').inner_text() == 'Một câu trả lời tiếng Việt.')

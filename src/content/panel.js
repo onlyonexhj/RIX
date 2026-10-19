@@ -229,7 +229,7 @@
     host.innerHTML = `
       <div class="xai-hd" data-i18n-title="按住拖动可移动面板，双击此处复位" title="按住拖动可移动面板，双击此处复位">
         <div class="xai-hd__ico">✦</div>
-        <div class="xai-hd__t" data-i18n="AI 回复助手">AI 回复助手</div>
+        <div class="xai-hd__t" data-i18n="RIX">RIX</div>
         <button class="xai-hd__reset" data-i18n="复位" data-i18n-title="复位到默认位置" title="复位到默认位置">复位</button>
         <div class="xai-hd__grab">⠿</div>
         <button class="xai-hd__x" data-i18n-title="关闭" title="关闭">✕</button>

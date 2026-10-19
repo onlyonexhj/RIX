@@ -29,7 +29,7 @@ def find_ext_id(profile):
                 try:
                     m = json.load(open(os.path.join(root, "manifest.json"), encoding="utf-8"))
                     found.append((name, m.get("name", "?")))
-                    if "回复" in m.get("name", "") or "X AI" in m.get("name", ""):
+                    if m.get("name") == "RIX":
                         return name, found
                 except Exception:
                     pass

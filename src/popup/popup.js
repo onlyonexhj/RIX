@@ -24,7 +24,7 @@
       I.setLocale(cfg.uiLang);
       I.apply(document);
       document.documentElement.lang = I.getLocale();
-      document.title = t('X AI 回复助手');
+      document.title = t('RIX');
     }
     const languages = I ? I.languages : [{ id: 'auto', label: '跟随浏览器' }, { id: 'zh', label: '中文' }];
     $('uiLang').innerHTML = languages

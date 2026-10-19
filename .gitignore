@@ -14,3 +14,4 @@ __pycache__/
 
 # 商店上传包（构建产物，可由 manifest+icons+src 重新打包）
 x-ai-reply*.zip
+RIX-v*.zip

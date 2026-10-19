@@ -1,7 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "X AI reply assistant",
-  "version": "1.0.1",
+  "name": "RIX",
+  "short_name": "RIX",
+  "version": "1.0.2",
   "description": "在 X 推文时间线点击回复气泡后，用 AI 生成多条回复候选，一键回填到发帖输入框。",
   "minimum_chrome_version": "116",
   "permissions": [
@@ -48,7 +49,7 @@
   ],
   "action": {
     "default_popup": "src/popup/popup.html",
-    "default_title": "X AI 回复助手",
+    "default_title": "RIX",
     "default_icon": {
       "16": "icons/icon16.png",
       "32": "icons/icon32.png",
