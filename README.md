@@ -1,5 +1,8 @@
 # X AI 回复助手
 
+[![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/License-PolyForm_NC_1.0.0-8B5CF6)](LICENSE)
+[![Chrome Web Store](https://img.shields.io/badge/Chrome-%E5%95%86%E5%BA%97%E5%B7%B2%E4%B8%8A%E6%9E%B6-4285F4)](https://chromewebstore.google.com)
+
 [中文](README.md) | [English](README.en.md) | [日本語](README.ja.md) | [Tiếng Việt](README.vi.md) | [한국어](README.ko.md)
 
 在 X（Twitter）推文时间线点击**回复气泡**打开发帖弹层时，扩展会自动读取被回复的推文内容，调用 AI 生成**多条**回复候选，点击任一条即可一键回填到输入框。

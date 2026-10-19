@@ -1,5 +1,8 @@
 # SmartReply for X
 
+[![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/License-PolyForm_NC_1.0.0-8B5CF6)](LICENSE)
+[![Chrome Web Store](https://img.shields.io/badge/Chrome_Web_Store-Available-4285F4)](https://chromewebstore.google.com)
+
 [中文](README.md) | [English](README.en.md) | [日本語](README.ja.md) | [Tiếng Việt](README.vi.md) | [한국어](README.ko.md)
 
 Click **Reply** on a post in your X (Twitter) timeline to open the reply dialog. The extension reads the original post, asks your chosen AI model for **several reply suggestions**, and lets you insert a suggestion with one click.
