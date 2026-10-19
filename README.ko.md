@@ -371,3 +371,7 @@ A: Base URL을 `http://localhost:11434/v1`로 설정하고 설정 페이지에�
 
 **Q: 다른 모델로 바꿀 수 있나요?**
 A: OpenAI의 `/chat/completions`와 호환되면 가능합니다. 설정 페이지의 「사용자 지정(OpenAI 호환)」에서 Base URL과 모델 이름을 입력하면 됩니다.
+
+## 📄 라이선스
+
+이 프로젝트는 **PolyForm Noncommercial License 1.0.0**에 따라 공개됩니다. 개인 사용·학습·수정·배포는 자유이지만 **상업적 이용은 금지**됩니다. 전체 조건은 [LICENSE](LICENSE)를 참고하세요. 상용 라이선스 문의는 [onlyonexhj](https://github.com/onlyonexhj)로 연락 바랍니다.

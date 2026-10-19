@@ -372,3 +372,9 @@ Use `http://localhost:11434/v1` as the base URL, select Test connection, and all
 **Can I use another model?**
 
 Yes, if it provides an OpenAI-compatible `/chat/completions` endpoint. Choose Custom (OpenAI compatible) and enter its base URL and model name.
+
+## 📄 License
+
+This project is released under the **PolyForm Noncommercial License 1.0.0** — free for personal use, learning, modification, and distribution. **Commercial use is not permitted** (no selling, paywalls, internal use by for-profit companies, or competing offerings).
+
+See [LICENSE](LICENSE) for the full terms. For commercial licensing, contact [onlyonexhj](https://github.com/onlyonexhj).

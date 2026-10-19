@@ -371,3 +371,7 @@ Ngoài ra, tắt tiện ích trong cài đặt, chuyển về chế độ mặc 
 
 **Hỏi: Có thể dùng mô hình khác không?**
 Đáp: Có, miễn là tương thích với `/chat/completions` của OpenAI. Trong cài đặt, chọn «Tùy chỉnh (tương thích OpenAI)» rồi nhập Base URL và tên mô hình.
+
+## 📄 Giấy phép
+
+Dự án này được phát hành theo **PolyForm Noncommercial License 1.0.0** — miễn phí cho mục đích cá nhân, học tập, chỉnh sửa và phân phối. **Cấm sử dụng cho mục đích thương mại**. Xem [LICENSE](LICENSE) để biết điều khoản đầy đủ. Liên hệ [onlyonexhj](https://github.com/onlyonexhj) để cấp phép thương mại.

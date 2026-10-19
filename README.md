@@ -371,3 +371,9 @@ A：Base URL 填 `http://localhost:11434/v1`，在设置页点「测试连接」
 
 **Q：能改成别的模型吗？**
 A：能，只要它兼容 OpenAI 的 `/chat/completions`。设置页「自定义（OpenAI 兼容）」填 Base URL 和模型名即可。
+
+## 📄 许可证
+
+本项目基于 **PolyForm Noncommercial License 1.0.0** 开源——个人使用、学习、修改、分发免费，**禁止商用**（出售、付费墙、商业公司内部使用、同业竞争均不允许）。
+
+完整条款见 [LICENSE](LICENSE)，中文摘要见 [LICENSE.zh-CN.md](LICENSE.zh-CN.md)。商业授权请联系 [onlyonexhj](https://github.com/onlyonexhj)。
