@@ -44,6 +44,21 @@ for (const [lang, text, autoRule, name] of cases) {
   });
 }
 
+for (const [lang, text] of [
+  ['ja', '了解です'], ['ja', '最高だね'], ['ja', '夏だ'], ['ja', 'ｽｺﾞｲ'],
+  ['ko', '감사'], ['ko', '좋다'], ['ko', '네'],
+  ['zh', '了解'], ['zh', '香港・台湾'], ['zh', '香港ｰ台湾'], ['en', 'AI product updates'],
+]) {
+  check('short text follows its source language: ' + text, () => {
+    const [, , autoRule, name] = cases.find(([id]) => id === lang);
+    assert.equal(XAI.utils.detectLang(text), lang);
+    const automatic = XAI.buildPrompt({ text }, { style: 'auto', lang: 'auto' });
+    assert.ok(automatic.system.includes(autoRule));
+    const ordinary = XAI.buildPrompt({ text }, { style: 'humor', lang: 'auto' });
+    assert.ok(ordinary.system.includes('输出语言：' + name));
+  });
+}
+
 check('panel auto overrides persisted explicit output language', () => {
   const prompt = XAI.buildPrompt({ text: cases[2][1] }, { style: 'auto', lang: 'en' }, { lang: 'auto' });
   assert.ok(prompt.system.includes('日本語で返信してください'));

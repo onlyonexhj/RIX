@@ -264,6 +264,71 @@ for (const name of ['callOpenAI', 'callAnthropic', 'callOpenAIStream', 'callAnth
   });
 }
 
+const outputLimitError = '模型输出已达到长度上限，请减少回复条数或提高输出上限后重试';
+const completionProviders = [
+  {
+    id: 'openai',
+    response: (raw, limited) => ({ choices: [{ message: { content: raw }, finish_reason: limited ? 'length' : 'stop' }] }),
+    wire: (raw, limited) => openEvent(raw) + 'data: ' + JSON.stringify({
+      choices: [{ delta: {}, finish_reason: limited ? 'length' : 'stop' }],
+    }) + '\n\ndata: [DONE]\n\n',
+  },
+  {
+    id: 'anthropic',
+    response: (raw, limited) => ({ content: [{ type: 'text', text: raw }], stop_reason: limited ? 'max_tokens' : 'end_turn' }),
+    wire: (raw, limited) => anthropicEvent(raw) + 'event: message_delta\ndata: ' + JSON.stringify({
+      type: 'message_delta', delta: { stop_reason: limited ? 'max_tokens' : 'end_turn' },
+    }) + '\n\nevent: message_stop\ndata: {"type":"message_stop"}\n\n',
+  },
+];
+
+for (const provider of completionProviders) {
+  for (const [label, raw] of [
+    ['empty reasoning-only output', ''],
+    ['an unfinished JSON candidate', '["First reply","Second reply cut'],
+    ['an apparently complete JSON array', '["First reply","Second reply"]'],
+  ]) {
+    test(provider.id + ' non-stream rejects token-limit stops with ' + label, async () => {
+      const env = environment({ config: { provider: provider.id, autoInsertFirst: true } });
+      env.state.fetch = async () => ({ ok: true, text: async () => JSON.stringify(provider.response(raw, true)) });
+      const result = await env.message({ type: 'xai:generate', payload: { tweet: { text: 'test' }, extra: { count: 2 } } });
+      assert.equal(result.ok, false);
+      assert.equal(result.error, outputLimitError);
+      assert.equal(result.data, undefined, 'no partial candidate is returned for auto-insertion');
+      assert.equal(vm.runInContext('inflight.size', env.sandbox), 0);
+    });
+
+    test(provider.id + ' stream never sends done after a token-limit stop with ' + label, async () => {
+      const env = environment({ config: { provider: provider.id, autoInsertFirst: true } });
+      const response = streamResponse(provider.wire(raw, true));
+      env.state.fetch = async () => response;
+      const port = makePort();
+      await env.call('handleGenerateStream', port, { tweet: { text: 'test' }, extra: { count: 2 } });
+      assert.equal(port.messages.at(-1).type, 'error');
+      assert.equal(port.messages.at(-1).error, outputLimitError);
+      assert.equal(port.messages.some((message) => message.type === 'done'), false);
+      assert.equal(port.onDisconnect.size, 0);
+      assert.equal(response.state.cancelled, 1);
+      assert.equal(response.state.released, 1);
+      assert.equal(vm.runInContext('inflight.size', env.sandbox), 0);
+    });
+  }
+
+  test(provider.id + ' normal stream and non-stream completions still return candidates', async () => {
+    const raw = '["First reply","Second reply"]';
+    const env = environment({ config: { provider: provider.id } });
+    env.state.fetch = async () => ({ ok: true, text: async () => JSON.stringify(provider.response(raw, false)) });
+    const result = await env.message({ type: 'xai:generate', payload: { tweet: { text: 'test' }, extra: { count: 2 } } });
+    assert.equal(result.ok, true);
+    assert.deepEqual(copy(result.data.list), ['First reply', 'Second reply']);
+    env.state.fetch = async () => streamResponse(provider.wire(raw, false));
+    const port = makePort();
+    await env.call('handleGenerateStream', port, { tweet: { text: 'test' }, extra: { count: 2 } });
+    assert.equal(port.messages.at(-1).type, 'done');
+    assert.deepEqual(port.messages.at(-1).list, ['First reply', 'Second reply']);
+  });
+}
+
 test('non-stream cancellation while config is loading prevents proxy writes and API calls', async () => {
   const env = environment();
   const ready = deferred();

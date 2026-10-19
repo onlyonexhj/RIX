@@ -186,19 +186,54 @@ async def main():
             await page.evaluate('''() => {
                 document.querySelector('#dlg').remove();
                 XAI.utils.isXDomain = () => true;
+                // Simulate an upgraded installation that still stores the old key.
                 fakeCfg.showFloatingButton = true;
+                fakeCfg.autoGenerate = true;
+                fakeCfg.autoInsertFirst = false;
                 chrome.storage = {onChanged:{addListener(){}}};
+                const timeline = document.querySelector('#timelineTweet');
+                const reply = document.createElement('button');
+                reply.dataset.testid = 'reply';
+                reply.textContent = 'Reply';
+                reply.addEventListener('click', () => {
+                    const dlg = document.createElement('div');
+                    dlg.id = 'nativeReplyDialog';
+                    dlg.setAttribute('role', 'dialog');
+                    dlg.setAttribute('aria-label', 'Reply');
+                    const original = timeline.cloneNode(true);
+                    original.removeAttribute('id');
+                    original.querySelector('[data-testid="reply"]').remove();
+                    dlg.appendChild(original);
+                    const editor = document.createElement('div');
+                    editor.dataset.testid = 'tweetTextarea_0';
+                    editor.contentEditable = 'true';
+                    editor.setAttribute('role', 'textbox');
+                    dlg.appendChild(editor);
+                    document.body.appendChild(dlg);
+                });
+                timeline.appendChild(reply);
             }''')
-            await page.add_style_tag(content=(ROOT / 'src/content/content.css').read_text(encoding='utf-8'))
             await page.add_script_tag(content=(ROOT / 'src/content/main.js').read_text(encoding='utf-8'))
             await page.hover('#timelineTweet')
-            await page.wait_for_selector('.xai-float.is-on', state='visible')
-            await page.hover('.xai-float')
-            check('真实鼠标移入悬浮按钮后仍可点击', await page.locator('.xai-float.is-on').is_visible())
-            await page.click('.xai-float')
+            await page.wait_for_timeout(700)
+            check('旧悬浮开关开启时，鼠标移入推文也不会显示悬浮入口',
+                  await page.locator('.xai-float').count() == 0 and
+                  not await page.evaluate('() => XAI.panel.isOpen()'))
+            await page.click('#timelineTweet [data-testid="reply"]')
             await page.wait_for_function('XAI.panel.isOpen() && document.querySelector(".xai-src__t").textContent.includes("时间线上的正文")')
-            check('真实悬浮按钮点击关联原推文', await page.locator('.xai-panel.is-open').is_visible())
-            await page.evaluate('() => XAI.panel.close()')
+            await page.wait_for_function('fakePorts.length === 4')
+            check('原生回复入口打开面板并自动生成一次',
+                  await page.locator('.xai-panel.is-open').is_visible() and
+                  await page.evaluate('() => fakePorts.length') == 4)
+            await page.hover('#nativeReplyDialog [data-testid="tweetText"]')
+            check('回复弹层中也不会出现悬浮入口', await page.locator('.xai-float').count() == 0)
+            await page.evaluate('() => fakePorts[3].emit({type:"done",list:["native reply result"],elapsedMs:20,model:"mock"})')
+            await page.click('.xai-it[data-i="0"]')
+            check('原生回复入口生成的候选可正常回填',
+                  await page.locator('#nativeReplyDialog [contenteditable="true"]').inner_text() == 'native reply result')
+            await page.evaluate('() => document.querySelector("#nativeReplyDialog").remove()')
+            await page.wait_for_function('!XAI.panel.isOpen()')
+            check('关闭原生回复弹层后助手自动关闭', not await page.locator('.xai-panel.is-open').count())
         finally:
             await browser.close()
     print('通过 %d / %d' % (passed, passed))

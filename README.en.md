@@ -42,7 +42,6 @@ The screenshots below use this README's interface language, with sample data for
 | Progress feedback | Shows elapsed time and first-response latency; displays a progress indicator after 30 seconds; supports stopping generation |
 | Retry after failure | Restores an actionable Retry button after an error |
 | Placement beside the dialog | Prefers the space to the left so the reply editor and posting controls remain accessible |
-| Timeline shortcut | Hover over a post to show the AI Reply button; generate before opening the reply dialog if you prefer |
 | Model providers | Zhipu GLM / DeepSeek / OpenAI / Claude / Kimi / OpenRouter / custom endpoints, including Ollama and vLLM |
 | Multilingual interface | 中文 / English / 日本語 / Tiếng Việt / 한국어; follow the browser language or select one manually |
 
@@ -210,8 +209,7 @@ src/
     detector.js               Reply-dialog detection and post extraction
     editor.js                 Draft.js editor reading and insertion
     panel.js                  Suggestion panel, dragging, and streaming UI
-    main.js                   Events, dialog polling, and floating button
-    content.css               Floating-button styles
+    main.js                   Native Reply events and dialog polling
   background/
     service-worker.js         AI requests, SSE parsing, and two API protocols
   options/                    Settings and prompt editor
@@ -351,10 +349,6 @@ Not without your selection and confirmation. The default does not take over your
 **The panel overlaps the dialog, or I want it elsewhere.**
 
 Drag the title bar containing `⠿` to pin it. Double-click the title bar or select Reset position to restore automatic placement.
-
-**A suggestion says the reply dialog is not open.**
-
-If you generated it using the timeline's floating button, open that post's reply dialog before inserting it. Entering through the normal Reply button already opens the dialog.
 
 **My custom prompt does not produce separate replies.**
 

@@ -42,9 +42,6 @@
         "src/content/panel.js",
         "src/content/main.js"
       ],
-      "css": [
-        "src/content/content.css"
-      ],
       "run_at": "document_idle",
       "all_frames": false
     }

@@ -190,7 +190,6 @@ SCRIPTS = [
     "src/shared/utils.js",
     "src/content/detector.js",
     "src/content/editor.js",
-    "src/content/content.css",
     "src/content/panel.js",
 ]
 

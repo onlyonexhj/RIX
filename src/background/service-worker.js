@@ -253,11 +253,9 @@ async function callOpenAI(cfg, prompt, signal) {
   const content =
     (json.choices && json.choices[0] && json.choices[0].message && json.choices[0].message.content) || '';
 
-  // ★ 推理模型陷阱：finish_reason=length 且 content 为空 = max_tokens 被 reasoning 吃光
+  // 有正文也可能只是被截断的半个 JSON，不能按成功候选回填。
   const fr = json.choices && json.choices[0] && json.choices[0].finish_reason;
-  if (!content && fr === 'length') {
-    throw new Error('模型输出为空（max_tokens 被推理过程吃光）。请把「最大生成长度」调大到 4000 以上后重试。');
-  }
+  throwIfOutputLimited(fr);
   return content;
 }
 
@@ -297,7 +295,15 @@ async function callAnthropic(cfg, prompt, signal) {
   }
   const json = safeParse(text);
   if (!json) throw new Error('返回非 JSON：' + text.slice(0, 200));
+  throwIfOutputLimited(json.stop_reason);
   return (json.content && json.content.map((c) => c.text || '').join('')) || '';
+}
+
+/** 服务商明确报告 token 上限时，不将不完整输出交给宽松的回复解析兜底。 */
+function throwIfOutputLimited(reason) {
+  if (reason === 'length' || reason === 'max_tokens') {
+    throw new Error('模型输出已达到长度上限，请减少回复条数或提高输出上限后重试');
+  }
 }
 
 function safeParse(s) {
@@ -469,6 +475,7 @@ async function callOpenAIStream(cfg, prompt, signal, onDelta) {
     throwStreamError(obj, event);
     const ch = obj && obj.choices && obj.choices[0];
     if (!ch) return;
+    throwIfOutputLimited(ch.finish_reason);
 
     // 同一 delta 可以同时含推理与正文，不能因推理字段跳过正文。
     const rc = ch.delta && ch.delta.reasoning_content;
@@ -539,6 +546,7 @@ async function callAnthropicStream(cfg, prompt, signal, onDelta) {
     throwStreamError(obj, event);
     if (!obj) return;
     const type = event || obj.type;
+    if (type === 'message_delta') throwIfOutputLimited(obj.delta && obj.delta.stop_reason);
     if (type === 'message_stop') return false;
     if (type === 'content_block_delta' && obj.delta && obj.delta.type === 'text_delta') {
       full += obj.delta.text || '';

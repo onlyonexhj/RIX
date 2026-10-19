@@ -43,7 +43,6 @@ STORE = {
         "proxyScheme": "http",
         "proxyHost": "127.0.0.1",
         "proxyPort": 7890,
-        "showFloatingButton": True,
         "autoInsertFirst": False,
         "debug": False,
     }

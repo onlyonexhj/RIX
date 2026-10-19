@@ -70,9 +70,8 @@ async def main():
                           || !!document.querySelector('[data-testid="AppTabBar_Profile_Link"]');
             const tweets = document.querySelectorAll('article[data-testid="tweet"]').length;
             const replyBtns = document.querySelectorAll('[data-testid="reply"]').length;
-            // 扩展的悬浮按钮 / 面板是否存在（content script 注入成功的旁证）
-            const floatBtn = !!document.querySelector('.xai-float');
-            return { loggedIn, tweets, replyBtns, floatBtn,
+            const panelOpen = !!document.querySelector('.xai-panel.is-open');
+            return { loggedIn, tweets, replyBtns, panelOpen,
                      title: document.title, url: location.href };
         }""")
         print("登录态:", state)

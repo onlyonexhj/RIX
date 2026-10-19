@@ -11,7 +11,7 @@
 
 一镜到底：
   ① 设置页：选预设 -> 填本地模拟接口 -> 测试连接成功
-  ② X 时间线：hover 推文 -> 悬浮「✦ AI 回复」-> 面板出现
+  ② X 时间线：点击推文的原生回复按钮 -> 面板出现
   ③ 选风格 -> 点生成 -> 本地模拟 SSE 流式出 3 条候选
   ④ 点任一条 -> 一键回填到输入框 -> 结束卡
 输出：store/promo-video.mp4
@@ -233,19 +233,20 @@ async def main():
         await caption(page, "第 2 步 · 在 X 时间线点回复", "已登录你的账号，全程真实操作")
         await page.wait_for_timeout(7000)
         tweet = await page.query_selector('article[data-testid="tweet"]')
-        if tweet:
-            await tweet.hover()
-            await page.wait_for_timeout(900)
-        else:
+        if not tweet:
             print("WARN: 未找到推文卡片，可能未登录或网络受限")
         try:
-            float_btn = await page.wait_for_selector("button.xai-float", timeout=12000)
-            await caption(page, "悬浮「✦ AI 回复」按钮自动出现", "hover 任意推文即触发")
-            await float_btn.click()
-            await page.wait_for_selector(".xai-panel", timeout=10000)
+            if not tweet:
+                raise RuntimeError("未找到推文卡片")
+            reply = await tweet.query_selector('[data-testid="reply"]')
+            if not reply:
+                raise RuntimeError("未找到推文的回复按钮")
+            await caption(page, "点击推文的回复按钮", "打开 X 回复弹层，助手自动读取原文")
+            await reply.click()
+            await page.wait_for_selector(".xai-panel.is-open", timeout=10000)
         except Exception as e:
-            print("float/panel failed:", repr(e)[:150])
-            await caption(page, "（演示环境未触发悬浮按钮）", "")
+            print("reply/panel failed:", repr(e)[:150])
+            await caption(page, "（演示环境未打开回复面板）", "")
             await page.wait_for_timeout(2000)
             await context.close()
             webms = [os.path.join(VIDEO_DIR, f) for f in os.listdir(VIDEO_DIR) if f.endswith(".webm")]

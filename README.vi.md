@@ -39,7 +39,6 @@ Các ảnh chụp bên dưới sử dụng ngôn ngữ giao diện tương ứng
 | Theo dõi yêu cầu lâu | Hiển thị thời gian đã chạy và độ trễ đến nội dung đầu tiên; có thanh tiến trình sau 30 giây; có thể «Dừng» bất cứ lúc nào |
 | Thử lại khi lỗi | Khi xảy ra lỗi, nút chuyển thành «↻ Thử lại» và vẫn dùng được, không bị kẹt ở trạng thái vô hiệu hóa |
 | Không che hộp thoại | Ưu tiên đặt bảng gợi ý bên trái hộp thoại để bạn vẫn thấy ô soạn thảo và nút đăng |
-| Nút nổi trên dòng thời gian | Rê chuột lên bài đăng để hiện «✦ Trả lời bằng AI», dùng được cả khi chưa nhấp biểu tượng trả lời |
 | Nhiều nhà cung cấp | Zhipu GLM / DeepSeek / OpenAI / Claude / Kimi / OpenRouter / tùy chỉnh (Ollama, vLLM, v.v.) |
 | Giao diện đa ngôn ngữ | 中文 / English / 日本語 / Tiếng Việt / 한국어; theo ngôn ngữ trình duyệt hoặc chọn thủ công |
 
@@ -210,8 +209,7 @@ src/
     detector.js               ★ Nhận diện hộp thoại + trích xuất nội dung bài đăng
     editor.js                 ★ Đọc/ghi trình soạn thảo Draft.js (phần cốt lõi của điền nội dung)
     panel.js                  Giao diện bảng gợi ý AI (kéo thả + hiển thị truyền trực tuyến)
-    main.js                   Điểm vào: gắn sự kiện, kiểm tra hộp thoại định kỳ, nút nổi
-    content.css               Kiểu hiển thị nút nổi trên dòng thời gian
+    main.js                   Điểm vào: bắt sự kiện trả lời của X, kiểm tra hộp thoại định kỳ
   background/
     service-worker.js         Trung gian yêu cầu AI + phân tích SSE truyền trực tuyến + hai giao thức
   options/                    Trang cài đặt (gồm trình sửa prompt)
@@ -353,9 +351,6 @@ Ngoài ra, tắt tiện ích trong cài đặt, chuyển về chế độ mặc 
 
 **Hỏi: Bảng gợi ý che hộp thoại hoặc tôi muốn đặt ở chỗ khác?**
 Đáp: Giữ thanh tiêu đề có biểu tượng `⠿` và kéo đến vị trí mong muốn. Sau khi kéo, bảng cố định tại đó và không tự di chuyển theo hộp thoại. Nhấp đúp thanh tiêu đề hoặc nhấp «Đặt lại vị trí» để khôi phục định vị tự động.
-
-**Hỏi: Nhấp gợi ý nhưng báo «Hộp thoại soạn bài chưa mở»?**
-Đáp: Khi tạo gợi ý từ nút nổi trên dòng thời gian, hộp thoại chưa mở. Hãy nhấp biểu tượng trả lời của chính bài đăng đó để mở hộp thoại, rồi quay lại nhấp gợi ý. Nếu bắt đầu bằng biểu tượng trả lời như bình thường thì sẽ không gặp trường hợp này.
 
 **Hỏi: Sau khi tùy chỉnh mẫu, AI không làm theo hoặc không phân tích được nhiều câu trả lời?**
 Đáp: ① Giữ «Định dạng đầu ra = Mảng JSON nghiêm ngặt»; ② Kiểm tra mẫu không có chỉ dẫn mâu thuẫn như «chỉ xuất một câu trả lời»; ③ Nhấp «Xem trước prompt» để chắc chắn `{{count}}` đã được thay bằng số câu bạn muốn.

@@ -204,24 +204,6 @@ async def main():
                 detail = "EXCEPTION: " + str(e)[:180]
             check(name, ok, detail)
 
-        # 面板 UI 视觉验证（单独截图）
-        try:
-            await page.add_script_tag(content=open(
-                os.path.join(ROOT, "src/content/content.css"), encoding="utf-8").read())
-            await page.evaluate("""() => {
-                const b = document.createElement('button');
-                b.className = 'xai-float is-on';
-                b.textContent = '✦ AI 回复';
-                b.style.top = '20px'; b.style.left = '20px';
-                document.body.appendChild(b);
-            }""")
-            os.makedirs(os.path.join(ROOT, "dev"), exist_ok=True)
-            await page.screenshot(path=os.path.join(ROOT, "dev", "shot-hover.png"))
-            print("  PASS 悬浮按钮截图")
-            results.append(("悬浮按钮渲染", True))
-        except Exception as e:
-            print("  SKIP 悬浮按钮截图: " + str(e)[:100])
-
         # ---------------- 面板拖拽（真实鼠标事件） ----------------
         try:
             await page.add_script_tag(content="""

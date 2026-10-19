@@ -137,7 +137,6 @@ async def capture_panel(context, language, scene, output):
     try:
         await page.set_content(panel_html(language, scene))
         await page.evaluate(chrome_mock(language, scene))
-        await page.add_style_tag(path=str(ROOT / "src/content/content.css"))
         for script in SCRIPTS:
             await page.add_script_tag(path=str(ROOT / "src" / script))
         await page.evaluate("""async replies => {

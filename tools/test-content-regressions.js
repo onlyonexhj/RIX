@@ -262,20 +262,21 @@ async function run() {
     original.remove(); dialog.appendChild(quoted);
     assert.equal(e.realDetector.extractTargetTweet({ dialog, editor }), null);
   });
-  await test('hover button retains its article and stays visible when entered', async () => {
-    const e = environment({ autoGenerate: false }, true); await flush(); e.current(null);
+  await test('hovering never creates an AI entry, even with the legacy setting enabled', async () => {
+    const e = environment({ autoGenerate: false, showFloatingButton: true }, true); await flush(); e.current(null);
     const article = e.doc.createElement('article'); article.setAttribute('data-testid', 'tweet'); article.tweet = e.tweetA; e.doc.body.appendChild(article);
     await e.doc.fire('mouseover', { target: article });
-    const button = e.element('.xai-float'); assert.ok(button.classList.contains('is-on'));
-    await e.doc.fire('mouseout', { target: article, relatedTarget: button });
-    await e.doc.fire('mouseover', { target: button, relatedTarget: article });
-    assert.ok(button.classList.contains('is-on'));
-    await button.fire('click'); await flush();
-    assert.equal(e.P.isOpen(), true); assert.match(e.element('.xai-src__t').textContent, /tweet A/);
+    await e.doc.fire('mouseout', { target: article, relatedTarget: e.a.dialog });
+    await e.doc.fire('mouseover', { target: e.a.dialog, relatedTarget: article });
+    assert.equal(e.element('.xai-float'), null);
+    assert.equal(e.P.isOpen(), false);
     assert.equal(e.requests().length, 0);
-    await e.doc.fire('mouseout', { target: button });
-    await e.doc.fire('mouseover', { target: article });
-    assert.ok(button.classList.contains('is-on'));
+    const reply = e.doc.createElement('button'); reply.setAttribute('data-testid', 'reply'); article.appendChild(reply);
+    await e.doc.fire('click', { target: reply }); e.current(e.a);
+    await e.tick(); await e.runTimeouts();
+    assert.equal(e.P.isOpen(), true);
+    assert.match(e.element('.xai-src__t').textContent, /tweet A/);
+    assert.equal(e.element('.xai-float'), null);
   });
   await test('watcher ignores new posts and validates the original delayed reply dialog', async () => {
     const e = environment({}, true); await flush();
@@ -381,9 +382,9 @@ async function run() {
     checkbox.checked = false; await checkbox.fire('change'); e.P.autoGenerate(); await flush(); assert.equal(e.requests().length, 0);
     checkbox.checked = true; await checkbox.fire('change'); e.P.autoGenerate(); await flush(); assert.equal(e.requests().length, 1); e.P.cancel();
   });
-  await test('hover-to-reply transition does not duplicate an in-flight or completed request', async () => {
-    const e = environment(); e.current(null); await e.P.open(null, e.tweetA); const generating = e.P.generate(); await flush();
-    e.current(e.a); await e.P.open(e.a); e.P.autoGenerate(); assert.equal(e.requests().length, 1);
+  await test('reopening the same reply does not duplicate an in-flight or completed request', async () => {
+    const e = environment(); await e.P.open(e.a); const generating = e.P.generate(); await flush();
+    await e.P.open(e.a); e.P.autoGenerate(); assert.equal(e.requests().length, 1);
     e.ports[0].onMessage.emit(done('reply A')); await generating; e.P.autoGenerate(); await flush(); assert.equal(e.requests().length, 1);
   });
   await test('an old configuration read cannot overwrite a newer interface language event', async () => {

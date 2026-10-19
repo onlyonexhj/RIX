@@ -48,7 +48,7 @@
     proxyScheme: 'http', // http | socks4 | socks5
 
     // —— 交互默认值 ——
-    // 打开回复面板时自动请求 AI（点「回复」气泡 / 悬浮 ✦ 按钮后立即生成）。
+    // 点击 X 原生「回复」按钮打开面板后自动请求 AI。
     // 关掉则保持老流程：面板打开后手动点「生成回复」
     autoGenerate: true,
     count: 3,
@@ -73,7 +73,6 @@
 
     // —— 高级 ——
     autoInsertFirst: false, // 生成完是否自动回填第 1 条
-    showFloatingButton: true, // 时间线上是否显示悬浮 AI 按钮
     debug: false,
   };
 

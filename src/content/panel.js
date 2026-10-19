@@ -725,7 +725,7 @@
 
     if (!state.tweet || (!state.tweet.text && !(state.tweet.media || []).length)) {
       U.toast(T('未能读取推文正文，无法生成'), 'err');
-      setStatus('未能读取推文正文，请先关闭弹层再点时间线的 ✦ 按钮', 'err');
+      setStatus('未能读取推文正文，请关闭后重新打开这条推文的回复弹层', 'err');
       return;
     }
 
@@ -932,7 +932,7 @@
   /**
    * 自动生成入口（main.js 在面板打开后调用）。
    * 规则：正在生成就不打断；同一条推文已自动生成过就不再重复
-   * （悬浮按钮先生成 -> 用户再点回复气泡打开弹层，不会发起第二次请求）。
+   * 弹层重新挂载时仍沿用当前推文的生成结果，避免重复请求。
    */
   P.autoGenerate = function autoGenerate() {
     if (cfg.autoGenerate === false) return; // 设置页「交互行为」可关
@@ -1141,21 +1141,4 @@
     schedulePosition();
   };
 
-  /** 设置"待填入"的推文（用户点悬浮按钮时还没有发帖弹层） */
-  P.setPendingTweet = function setPendingTweet(tweet) {
-    if (!tweet || !state.open) return;
-    setTarget(tweet, null);
-    if (!host) return;
-    els.src.style.display = '';
-    const head = [tweet.author, tweet.handle].filter(Boolean).join(' ');
-    els.srcText.textContent = head + '\n' + (tweet.text || T('（纯媒体推文）'));
-    setStatus('点时间线的回复气泡打开弹层后，点结果即可回填', 'warn');
-  };
-
-  /** 弹层出现时（main.js 调用），若处于待填入模式则保留结果 */
-  P.onComposerReady = function onComposerReady(composer) {
-    if (!state.pending || !matchesComposer(composer, state.tweet)) return;
-    state.composer = composer;
-    state.pending = false;
-  };
 })(typeof window !== 'undefined' ? window : self);

@@ -99,7 +99,7 @@ async def main():
                               device_scale_factor=1, color_scheme="dark")
         await pg.set_content(X_PAGE)
         for f in ["src/shared/config.js", "src/shared/utils.js",
-                  "src/content/detector.js", "src/content/editor.js", "src/content/content.css"]:
+                  "src/content/detector.js", "src/content/editor.js"]:
             await pg.add_script_tag(content=open(os.path.join(ROOT, f), encoding="utf-8").read())
         await pg.add_script_tag(content="""
           window.chrome = { storage: { local: {

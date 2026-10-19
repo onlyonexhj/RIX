@@ -37,7 +37,6 @@ SEED_CONFIG = {
     "enabled": True,
     "autoGenerate": True,
     "autoInsertFirst": False,
-    "showFloatingButton": True,
     "stream": True,
     "style": "auto",
     "count": 3,
@@ -369,7 +368,6 @@ async def render_assets(out_dir: str) -> dict:
         page = await context.new_page()
         page.on("pageerror", lambda error: page_errors.append(str(error)))
         await page.goto(FIXTURE_URL, wait_until="domcontentloaded")
-        await page.add_style_tag(path=str(ROOT / "src/content/content.css"))
         for rel in CONTENT_SCRIPTS:
             await page.add_script_tag(path=str(ROOT / rel))
         await page.add_style_tag(content="""

@@ -152,12 +152,12 @@ function scanFile(file) {
 }
 
 function walk(dir, acc) {
-  for (const name of fs.readdirSync(dir)) {
-    if (name === 'node_modules' || name === '.git') continue;
-    const p = path.join(dir, name);
-    const st = fs.statSync(p);
-    if (st.isDirectory()) walk(p, acc);
-    else if (/\.(js|mjs|cjs)$/.test(name)) acc.push(p);
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (entry.name === 'node_modules' || entry.name === '.git') continue;
+    const p = path.join(dir, entry.name);
+    // 不跟随符号链接或目录联接，避免扫描工作区外的依赖及运行时数据。
+    if (entry.isDirectory()) walk(p, acc);
+    else if (entry.isFile() && /\.(js|mjs|cjs)$/.test(entry.name)) acc.push(p);
   }
   return acc;
 }
@@ -165,7 +165,11 @@ function walk(dir, acc) {
 /* ---------------------------- main ---------------------------- */
 
 const root = path.join(__dirname, '..');
-const files = walk(root, []);
+// 项目代码位于 src/ 和 tools/；dev/、录制 profile 等目录仅存放生成或运行时产物。
+const files = fs.readdirSync(root, { withFileTypes: true })
+  .filter(entry => entry.isFile() && /\.(js|mjs|cjs)$/.test(entry.name))
+  .map(entry => path.join(root, entry.name));
+for (const name of ['src', 'tools']) walk(path.join(root, name), files);
 
 const allProblems = [];
 for (const f of files) {

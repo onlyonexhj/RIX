@@ -16,7 +16,7 @@
   const FIELDS = [
     'enabled', 'provider', 'baseUrl', 'apiKey', 'model', 'maxTokens', 'timeoutSec',
     'disableThinking', 'vision', 'style', 'count', 'lang', 'uiLang', 'length', 'customInstruction',
-    'showFloatingButton', 'autoGenerate', 'autoInsertFirst', 'debug',
+    'autoGenerate', 'autoInsertFirst', 'debug',
     // 提示词配置
     'promptFormat', 'persona', 'systemPrompt', 'userPrompt',
     // 网络 / 代理

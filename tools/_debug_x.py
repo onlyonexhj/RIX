@@ -26,7 +26,7 @@ async def main():
             url: location.href,
             title: document.title,
             tweets: document.querySelectorAll('article[data-testid="tweet"]').length,
-            floatBtn: !!document.querySelector('button.xai-float'),
+            panelOpen: !!document.querySelector('.xai-panel.is-open'),
             bodyLen: document.body ? document.body.innerText.length : 0,
             snippet: (document.body ? document.body.innerText.slice(0,300) : '')
         })""")
