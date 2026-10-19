@@ -1,4 +1,4 @@
-# X AI 返信アシスタント
+# SmartReply for X
 
 [中文](README.md) | [English](README.en.md) | [日本語](README.ja.md) | [Tiếng Việt](README.vi.md) | [한국어](README.ko.md)
 
